@@ -142,7 +142,7 @@ https://live.baohatinh.vn/httv1/index.m3u8
 https://natv.vncdn.vn/natvlive/tv1live.m3u8
 
 #EXTINF:-1 tvg-id="thanhhoa" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/thanhhoa.png", TTV HD | Báo và PTTH Thanh Hóa
-https://cdn-traffic.sohatv.vn/live/pull/Y5Kan2X7I7GHo4VN/thth-live/eVc6tyHuFZLQYgmX/337a54767a7233703637564336316a6d0661b18bc8082e4c0ba81271c26647bd9246a367d662642325cfc262160b9e9b095c42b0b7d7d1bde5bbb7da14056e80b71bd310f87ac8b2180f81559ae9f5b3c7795692f1be450ef3eb99ee36f5c4ad107a07f52f41130610bb961b45d6032032733fb9c9a59dae708028ce919238071352ec99d62d8849371372e44f74a4db9474c0c9da4f263617642cd47c689631a71a4fccd6e64ef7bec14b572f416123/master.m3u8
+ttps://vips-livecdn.fptplay.net/Mzk3MTY5MDR8dGhhbmhob2FfaGxzLnNtaWx8dm5wdHwxNzgyOTczNjc2fDExMy4xODIuMzAuMTUzfGFiZWIyMzkwNzljODI4MTNlMTZjNTZkMGVhN2U5YjFm/fnxsd1/thanhhoa_hls.smil/chunklist_b2500000.m3u8
 
 #EXTINF:-1 tvg-id="quangninh1" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://media.baoquangninh.vn/upload/files/logo/logotrangchu1.png", QTV1 HD | Báo và PTTH Quảng Ninh
 https://live.baoquangninh.vn/qtvlive/tv1live.m3u8
@@ -157,25 +157,25 @@ https://stream.langsontv.vn/live/285c78da0c246524c90917842f8de03bd21/chunklist.m
 https://cdn.sonlatv.vn/live/28595222e707a364251b8724717894baa46/chunklist.m3u8
 
 #EXTINF:-1 tvg-id="dienbien" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/dienbienphu.png", ĐTV HD | Báo và PTTH Điện Biên Phủ
-hhttps://live.mediatech.vn/live/2855dfeccb7f49a41a2b0441b3bfeda413c/playlist.m3u8
+https://vips-livecdn.fptplay.net/Mzk3MTY5MDR8ZGllbmJpZW5faGxzLnNtaWx8dm5wdHwxNzgyOTczNzMxfDExMy4xODIuMzAuMTUzfDhhZTdiYmY2MGRjODJlY2Y2M2JmYzUwNjQ5NWUxNjhj/fnxsd1/dienbien_hls.smil/chunklist_b2500000.m3u8
 
 #EXTINF:-1 tvg-id="laichau" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/laichau.png", LTV | Báo và PTTH Lai Châu
-https://fo-hlc.tv360.vn/bpk-tv/374/output/index.m3u8?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXRob2QiOiJHRVQiLCJleHAiOjE3ODIxMzE3NDUsInVyaSI6Ii9icGstdHYvMzc0L291dHB1dC9pbmRleC5tM3U4In0.6iMS27ORAzFlwA_-9HaBfSnzCvyHHJQ--UL7uXdtOfE&minrate=0&maxrate=10000000&uid=283173703
+https://vips-livecdn.fptplay.net/Mzk3MTY5MDR8bGFpY2hhdV9obHMuc21pbHx2bnB0fDE3ODI5NzM3NjZ8MTEzLjE4Mi4zMC4xNTN8YWVkOGNmOTA5ZWJiNTlkZTJlZTNiOWM4ZDQ4ODJjN2Y/fnxsd1/laichau_hls.smil/chunklist_b2500000.m3u8
 
 #EXTINF:-1 tvg-id="angiang1" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/angiang1.png", ATV1 | Báo và PTTH An Giang
 https://tv.angiangtv.vn/live/kgtv/kgtv.m3u8
 #EXTINF:-1 tvg-id="angiang2" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/angiang2.png", ATV2 | Báo và PTTH An Giang
-https://live.fptplay53.net/epzsd1/angiang_hls.smil/chunklist_b1800000.m3u8
+https://vips-livecdn.fptplay.net/Mzk3MTY5MDR8YW5naWFuZzAyaGRfdmhscy5zbWlsfHZucHR8MTc4Mjk3MzgxM3wxMTMuMTgyLjMwLjE1M3xiMDk1ZTA3ZmE0YWVlMGFjZWRjYWFkMDE5NjEwNDMwYQ/epzhd2/angiang02hd_vhls.smil/chunklist_b5000000.m3u8
 #EXTINF:-1 tvg-id="angiang3" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/angiang3.png", ATV3 | Báo và PTTH An Giang
 https://tv.angiangtv.vn/live/kgtv1/kgtv1.m3u8
 
 #EXTINF:-1 tvg-id="camau" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/camau.png", CTV HD | Báo và PTTH Cà Mau
-https://live.fptplay53.net/epzsd1/camau_hls.smil/chunklist.m3u8
+https://vips-livecdn.fptplay.net/Mzk3MTY5MDR8Y2FtYXVoZF92aGxzLnNtaWx8dm5wdHwxNzgyOTczODUzfDExMy4xODIuMzAuMTUzfDJmNDMwMjIxOGFhMDEyOWMxNjAwNWRiM2Q0OWIxZTMz/epzhd2/camauhd_vhls.smil/chunklist_b5000000.m3u8
 
 #EXTINF:-1 tvg-id="dongthap1" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/dongthap1.png", THĐT1 HD | Báo và PTTH Đồng Tháp
-https://live.fptplay53.net/epzsd1/dongthap_vhls.smil/chunklist_b5000000.m3u8
+https://live.fptplay53.net/epzhd2/dongthap01_vhls.smil/chunklist_b5000000.m3u8
 #EXTINF:-1 tvg-id="dongthap2" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/dongthap2.png", Miền tây THĐT2 | Báo và PTTH Đồng Tháp
-https://live.fptplay53.net/epzsd1/dongthaphd_vhls.smil/chunklist_b5000000.m3u8
+https://618b88f69e53b.streamlock.net/THDT2/thdttv2/playlist.m3u8
 
 #EXTINF:-1 tvg-id="tayninh1" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/tayninh.png", TN TV | Báo và PTTH Tây Ninh
 https://live.fptplay53.net/epzsd1/tayninh01_hls.smil/chunklist.m3u8
@@ -189,7 +189,7 @@ https://live.fptplay53.net/epzsd1/khanhhoa_hls.smil/chunklist.m3u8
 
 #EXTINF:-1 tvg-id="khanhhoa1" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/khanhhoa1.png", KTV1 HD | Báo và PTTH Khánh Hòa
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0
-https://livecdn-vthcm-bp.vieon.vn/7e6e2be3290c6fc86e16e4d44d17222d/1782196690000/livetv/group-01/90bb7cfb7814297c451327aadb037a89/playlist.m3u8?c=h
+https://freem3u.xyz/api/live/play.m3u8?vid=76
 
 #EXTINF:-1 tvg-id="gialai" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/gialai.png", GTV | Báo và PTTH Gia Lai
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0
@@ -213,7 +213,7 @@ https://live.mediatech.vn/live/285f5449d7d7d2946e0bd2d54b7e60f25a4/chunklist.m3u
 
 #EXTINF:-1 tvg-id="bacninh" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/bacninh.png", BTV | Báo và PTTH Bắc Ninh
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0
-https://1253668792.e.cdneverest.net/RN3FfnrrhJKeZrUagD3d-g/1782151901/live/285f5f227e988ab4445a2138091d3d62e8d/playlist.m3u8
+https://vips-livecdn.fptplay.net/Mzk3MTY5MDR8YmFjbmluaDAxX2hscy5zbWlsfHZucHR8MTc4Mjk3NDA3MHwxMTMuMTgyLjMwLjE1M3xjMjc2OTUwMDdlMDhkZjZkZDgyZmYyY2MxNjcwZDlkZg/fnxsd1/bacninh01_hls.smil/chunklist_b2500000.m3u8
 
 #EXTINF:-1 tvg-id="phutho" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/phutho.png", PTV | Báo và PTTH Phú Thọ
 https://live.fptplay53.net/fnxsd1/phutho_hls.smil/chunklist.m3u8
