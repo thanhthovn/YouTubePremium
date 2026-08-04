@@ -136,7 +136,7 @@ https://stream.thingnet.vn/live/smil:CRTV.smil/playlist.m3u8
 https://live.baohatinh.vn/httv1/index.m3u8
 
 #EXTINF:-1 tvg-id="nghean" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/nghean.png", NTV | Báo và PTTH Nghệ An
-https://natv.vncdn.vn/natvlive/tv1live.m3u8
+https://live.mediatech.vn/live/2859591eef2e92249b682db021f4247c364/chunklist.m3u8
 
 #EXTINF:-1 tvg-id="thanhhoa" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/thanhhoa.png", TTV HD | Báo và PTTH Thanh Hóa
 ttps://vips-livecdn.fptplay.net/Mzk3MTY5MDR8dGhhbmhob2FfaGxzLnNtaWx8dm5wdHwxNzgyOTczNjc2fDExMy4xODIuMzAuMTUzfGFiZWIyMzkwNzljODI4MTNlMTZjNTZkMGVhN2U5YjFm/fnxsd1/thanhhoa_hls.smil/chunklist_b2500000.m3u8
