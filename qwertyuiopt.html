@@ -267,6 +267,34 @@
         .play-btn {
             width: 44px;
             font-size: 19px;
+            background: #a51f1f;
+            border-color: #d13a3a;
+        }
+
+        .play-btn:hover {
+            background: #c52b2b;
+            border-color: #e14a4a;
+        }
+
+        /* Đang phát: nút Pause trở về màu xanh quân đội ban đầu */
+        .play-btn.playing {
+            background: rgba(38,59,32,.92);
+            border-color: rgba(126,148,82,.45);
+        }
+
+        .play-btn.playing:hover {
+            background: var(--military-light);
+            border-color: rgba(126,148,82,.45);
+        }
+
+        .current-channel-btn {
+            color: #82c341;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .current-channel-btn:hover {
+            color: #a6e063;
         }
 
         /* THẺ LIVE RIÊNG */
@@ -492,6 +520,7 @@
                             <button id="previousBtn" class="control-btn" type="button" title="Kênh trước">⏮</button>
                             <button id="playBtn" class="control-btn play-btn" type="button" title="Phát / Tạm dừng">▶</button>
                             <button id="nextBtn" class="control-btn" type="button" title="Kênh tiếp theo">⏭</button>
+                            <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>
 
                             <!-- 4. KHU VỰC CHỮ LIVE VỚI CHẤM ĐỎ -->
                             <div class="time-badge">
@@ -540,6 +569,7 @@
         const playBtn = document.getElementById("playBtn");
         const previousBtn = document.getElementById("previousBtn");
         const nextBtn = document.getElementById("nextBtn");
+        const currentChannelBtn = document.getElementById("currentChannelBtn");
         const progress = document.getElementById("progress");
         const openNewTabBtn = document.getElementById("openNewTabBtn");
         const fullscreenBtn = document.getElementById("fullscreenBtn");
@@ -755,9 +785,16 @@
             playerOverlay.textContent = "KÊNH NÀY KHÔNG PHÁT ĐƯỢC, VUI LÒNG CHỌN KÊNH KHÁC!";
             updatePlayButton();
         }
-
         function updatePlayButton() {
-            playBtn.textContent = video.paused ? "▶" : "⏸";
+            if (video.paused) {
+                // Đang dừng: nút Play màu đỏ
+                playBtn.textContent = "▶";
+                playBtn.classList.remove("playing");
+            } else {
+                // Đang phát: nút Pause màu xanh quân đội ban đầu
+                playBtn.textContent = "⏸";
+                playBtn.classList.add("playing");
+            }
         }
 
         function toggleFullscreen() {
@@ -804,12 +841,178 @@
                 }
             });
 
-            playBtn.addEventListener("click", () => {
-                if (video.paused) {
-                    video.play().catch(() => {});
-                } else {
+            playBtn.addEventListener("click", async () => {
+
+                /* =================================================
+                   ĐANG PHÁT -> PAUSE
+                ================================================== */
+
+                if (!video.paused) {
+
                     video.pause();
+
+                    updatePlayButton();
+
+                    return;
+
                 }
+
+
+                /* =================================================
+                   ĐANG PAUSE -> PLAY
+                   Với IPTV LIVE, đưa video về live edge trước
+                   khi phát lại để tránh đứng ở vị trí cũ.
+                ================================================== */
+
+                try {
+
+                    if (hls) {
+
+                        /*
+                         * Cho HLS.js tải playlist/segment lại.
+                         */
+                        if (typeof hls.startLoad === "function") {
+                            hls.startLoad(-1);
+                        }
+
+
+                        /*
+                         * Tìm vị trí LIVE mới nhất.
+                         */
+                        let livePosition = null;
+
+
+                        if (
+                            hls.liveSyncPosition != null &&
+                            isFinite(hls.liveSyncPosition)
+                        ) {
+
+                            livePosition =
+                                hls.liveSyncPosition;
+
+                        }
+
+
+                        /*
+                         * Nếu liveSyncPosition chưa có,
+                         * lấy cuối vùng seekable của video.
+                         */
+                        if (
+                            livePosition == null &&
+                            video.seekable &&
+                            video.seekable.length > 0
+                        ) {
+
+                            livePosition =
+                                video.seekable.end(
+                                    video.seekable.length - 1
+                                );
+
+                        }
+
+
+                        /*
+                         * Đưa về live edge.
+                         */
+                        if (
+                            livePosition != null &&
+                            isFinite(livePosition)
+                        ) {
+
+                            try {
+
+                                video.currentTime =
+                                    livePosition;
+
+                            }
+                            catch (seekError) {
+
+                                console.warn(
+                                    "Không thể seek về live edge:",
+                                    seekError
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+
+                    /*
+                     * Thử phát lại.
+                     */
+                    await video.play();
+
+                    updatePlayButton();
+
+                }
+                catch (error) {
+
+                    console.warn(
+                        "Play lại lần 1 thất bại:",
+                        error
+                    );
+
+
+                    /*
+                     * Nếu MediaElement bị lỗi,
+                     * thử khôi phục HLS.js rồi phát lại.
+                     */
+                    try {
+
+                        if (hls) {
+
+                            if (
+                                typeof hls.startLoad === "function"
+                            ) {
+
+                                hls.startLoad(-1);
+
+                            }
+
+
+                            if (
+                                typeof hls.recoverMediaError === "function"
+                            ) {
+
+                                hls.recoverMediaError();
+
+                            }
+
+                        }
+
+
+                        await new Promise(
+                            resolve =>
+                                setTimeout(
+                                    resolve,
+                                    300
+                                )
+                        );
+
+
+                        await video.play();
+
+                        updatePlayButton();
+
+                    }
+                    catch (retryError) {
+
+                        console.error(
+                            "Không thể Play lại luồng:",
+                            retryError
+                        );
+
+                        /*
+                         * Cập nhật lại icon về trạng thái thực tế.
+                         */
+                        updatePlayButton();
+
+                    }
+
+                }
+
             });
 
             video.addEventListener("play", updatePlayButton);
@@ -825,6 +1028,22 @@
                 if (channels.length === 0) return;
                 const nextIndex = (currentChannelIndex + 1) % channels.length;
                 playChannelByIndex(nextIndex, true, false);
+            });
+
+            // ĐI TỚI KÊNH ĐANG PHÁT
+            currentChannelBtn.addEventListener("click", () => {
+                if (currentChannelIndex < 0) return;
+
+                const activeChannel =
+                    document.querySelectorAll(".channel")[currentChannelIndex];
+
+                if (!activeChannel) return;
+
+                activeChannel.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                    inline: "center"
+                });
             });
 
             // MỞ XEM TRONG TAB MỚI NẾU BỊ VƯỚNG KHÓA FULLSCREEN CỦA GOOGLE SITES
