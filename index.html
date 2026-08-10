@@ -681,6 +681,28 @@
         let currentChannelIndex = -1;
         let hls = null;
 
+        // =========================================================
+        // LOW-END MODE
+        // Tối ưu cho máy yếu / trình duyệt yếu:
+        // - Giữ buffer vừa đủ.
+        // - Không giữ nhiều video cũ trong RAM.
+        // - Chỉ cho request phát mới nhất tiếp tục.
+        // =========================================================
+        const LOW_END_HLS_CONFIG = {
+            enableWorker: true,
+            lowLatencyMode: false,
+            manifestLoadingTimeOut: 8000,
+            maxBufferLength: 15,
+            maxMaxBufferLength: 20,
+            backBufferLength: 5,
+            maxBufferHole: 0.5,
+            startFragPrefetch: false,
+            liveSyncDurationCount: 3,
+            liveMaxLatencyDurationCount: 6
+        };
+
+        let playRequestId = 0;
+
         const player = document.getElementById("player");
         const video = document.getElementById("video");
         const playerOverlay = document.getElementById("playerOverlay");
@@ -763,6 +785,16 @@
             updateTimeLabels();
         }
 
+        document.addEventListener("visibilitychange", () => {
+            if (!hls) return;
+
+            if (document.hidden) {
+                try { hls.stopLoad(); } catch (_) {}
+            } else if (!video.paused) {
+                try { hls.startLoad(); } catch (_) {}
+            }
+        });
+
         window.addEventListener("DOMContentLoaded", () => {
             setupEventListeners();
             loadPlaylist();
@@ -775,6 +807,7 @@
             currentPlaylistId = playlist.id;
             M3U_URL = playlist.url;
             currentChannelIndex = -1;
+            ++playRequestId;
             selectedChannelGroup = "__ALL__";
             if (channelGroupFilter) {
                 channelGroupFilter.value = "__ALL__";
@@ -910,6 +943,7 @@
                 const index = channels.indexOf(channel);
 
                 const item = document.createElement("div");
+                item.dataset.channelIndex = String(index);
                 item.className = "channel" + (index === currentChannelIndex ? " active" : "");
 
                 const logoContainer = document.createElement("div");
@@ -924,6 +958,7 @@
                     img.src = channel.logo;
                     img.alt = channel.name;
                     img.loading = "lazy";
+                    img.decoding = "async";
                     img.onerror = function () {
                         this.style.display = "none";
                         fallback.style.display = "flex";
@@ -959,6 +994,23 @@
         });
 
         function playChannelByIndex(index, scrollToTop = true, isInitialAutoplay = false) {
+            const requestId = ++playRequestId;
+
+            // Dọn stream cũ trước khi tạo stream mới.
+            // Giúp máy yếu không phải xử lý song song nhiều stream.
+            if (hls) {
+                try { hls.stopLoad(); } catch (_) {}
+                try { hls.destroy(); } catch (_) {}
+                hls = null;
+            }
+
+            try { video.pause(); } catch (_) {}
+            video.removeAttribute("src");
+            try { video.load(); } catch (_) {}
+
+            if (requestId !== playRequestId) return;
+
+
             if (index < 0 || index >= channels.length) return;
 
             currentChannelIndex = index;
@@ -976,14 +1028,20 @@
             activeChannelName.title = channel.name;
             activeChannelName.style.display = "flex";
 
-            renderChannels();
+            // Chỉ đổi trạng thái active, không render lại toàn bộ danh sách.
+            document.querySelectorAll(".channel.active").forEach(el => {
+                el.classList.remove("active");
+            });
+
+            const activeCard = document.querySelector(
+                `.channel[data-channel-index="${index}"]`
+            );
+
+            if (activeCard) {
+                activeCard.classList.add("active");
+            }
 
             if (scrollToTop) window.scrollTo({ top: 0, behavior: "smooth" });
-
-            if (hls) {
-                hls.destroy();
-                hls = null;
-            }
 
             video.pause();
             progressSeekable = false;
@@ -1010,21 +1068,42 @@
                 video.src = url;
                 video.play().then(handlePlaySuccess).catch(handlePlayError);
             } else if (window.Hls && Hls.isSupported()) {
-                hls = new Hls({
-                    enableWorker: true,
-                    lowLatencyMode: true,
-                    manifestLoadingTimeOut: 8000
-                });
+                hls = new Hls(LOW_END_HLS_CONFIG);
+
+                if (requestId !== playRequestId) return;
 
                 hls.loadSource(url);
                 hls.attachMedia(video);
 
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (requestId !== playRequestId) return;
                     video.play().then(handlePlaySuccess).catch(handlePlayError);
                 });
 
                 hls.on(Hls.Events.ERROR, (event, data) => {
-                    if (data.fatal) handlePlayError(data);
+                    if (requestId !== playRequestId) return;
+                    if (!data.fatal) return;
+
+                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                        setTimeout(() => {
+                            if (requestId !== playRequestId || !hls) return;
+                            try {
+                                hls.startLoad();
+                            } catch (_) {}
+                        }, 800);
+                        return;
+                    }
+
+                    if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                        try {
+                            hls.recoverMediaError();
+                        } catch (_) {
+                            handlePlayError(data);
+                        }
+                        return;
+                    }
+
+                    handlePlayError(data);
                 });
             } else {
                 video.src = url;
