@@ -9,7 +9,7 @@
 
     <style>
         :root {
-            --logo-size: 108px;
+            --logo-size: 150px;
             --channel-name-size: 26px;
             --grid-gap: 16px;
             --military-black: #0b1009;
@@ -392,7 +392,7 @@
 
         .channel-list {
             display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: var(--grid-gap);
             padding: 16px;
         }
