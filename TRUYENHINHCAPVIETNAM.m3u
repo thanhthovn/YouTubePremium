@@ -139,7 +139,7 @@ https://live.baohatinh.vn/httv1/index.m3u8
 https://live.mediatech.vn/live/2859591eef2e92249b682db021f4247c364/chunklist.m3u8
 
 #EXTINF:-1 tvg-id="thanhhoa" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/thanhhoa.png", TTV HD | Báo và PTTH Thanh Hóa
-https://d4.dhcn.vn/hls/bth_th/master.m3u8?token=RDwVEBwZb4AhGz42wSiBbA
+https://d1.dhcn.vn/hls/bth_th/720p/index.m3u8
 
 #EXTINF:-1 tvg-id="quangninh1" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://media.baoquangninh.vn/upload/files/logo/logotrangchu1.png", QTV1 HD | Báo và PTTH Quảng Ninh
 https://live.baoquangninh.vn/qtvlive/tv1live.m3u8
