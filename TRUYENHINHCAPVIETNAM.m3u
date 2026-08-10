@@ -136,10 +136,10 @@ https://stream.thingnet.vn/live/smil:CRTV.smil/playlist.m3u8
 https://live.baohatinh.vn/httv1/index.m3u8
 
 #EXTINF:-1 tvg-id="nghean" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/nghean.png", NTV | Báo và PTTH Nghệ An
-https://live.mediatech.vn/live/2859591eef2e92249b682db021f4247c364/chunklist.m3u8
+https://vips-livecdn.fptplay.net/Mzk3MTY5MDR8ZG9uZ25haTFfaGxzLnNtaWx8dm5wdHwxNzg2MzMyNTU0fDEyMy4zMC4yMDUuMTY5fGRiYTE5ZDZhNzZlNTU1YWE0Y2EzOTQ1ZWJiMTM1YWVm/epzsd1/dongnai1_hls.smil/playlist.m3u8
 
 #EXTINF:-1 tvg-id="thanhhoa" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/thanhhoa.png", TTV HD | Báo và PTTH Thanh Hóa
-https://d1.dhcn.vn/hls/bth_th/720p/index.m3u8
+https://d4.dhcn.vn/hls/bth_th/master.m3u8?token=6Kvfpq_azyKhLsDBkgesxA
 
 #EXTINF:-1 tvg-id="quangninh1" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://media.baoquangninh.vn/upload/files/logo/logotrangchu1.png", QTV1 HD | Báo và PTTH Quảng Ninh
 https://live.baoquangninh.vn/qtvlive/tv1live.m3u8
@@ -151,7 +151,7 @@ https://stream.langsontv.vn/live/285c78da0c246524c90917842f8de03bd21/chunklist.m
 
 #EXTINF:-1 tvg-id="sonla" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/sonla.png", STV HD | Báo và PTTH Sơn La
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57
-https://cdn.sonlatv.vn/live/28595222e707a364251b8724717894baa46/chunklist.m3u8
+https://cdn.sonlatv.vn/live/28595222e707a364251b8724717894baa46/playlist.m3u8
 
 #EXTINF:-1 tvg-id="dienbien" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/dienbienphu.png", ĐTV HD | Báo và PTTH Điện Biên Phủ
 https://live.mediatech.vn/live/2855dfeccb7f49a41a2b0441b3bfeda413c/playlist.m3u8
@@ -167,7 +167,7 @@ https://vips-livecdn.fptplay.net/Mzk3MTY5MDR8YW5naWFuZzAyaGRfdmhscy5zbWlsfHZucHR
 https://tv.angiangtv.vn/live/kgtv1/kgtv1.m3u8
 
 #EXTINF:-1 tvg-id="camau" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/camau.png", CTV HD | Báo và PTTH Cà Mau
-https://vips-livecdn.fptplay.net/Mzk3MTY5MDR8Y2FtYXVoZF92aGxzLnNtaWx8dm5wdHwxNzgyOTczODUzfDExMy4xODIuMzAuMTUzfDJmNDMwMjIxOGFhMDEyOWMxNjAwNWRiM2Q0OWIxZTMz/epzhd2/camauhd_vhls.smil/chunklist_b5000000.m3u8
+https://freem3u.xyz/api/live/play.m3u8?vid=46
 
 #EXTINF:-1 tvg-id="dongthap1" group-title="📡ĐỊA PHƯƠNG" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/dongthap1.png", THĐT1 HD | Báo và PTTH Đồng Tháp
 https://live.fptplay53.net/epzhd2/dongthap01_vhls.smil/chunklist_b5000000.m3u8
