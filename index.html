@@ -9,7 +9,7 @@
 
     <style>
         :root {
-            --logo-size: 150px;
+            --logo-size: 108px;
             --channel-name-size: 26px;
             --grid-gap: 16px;
             --military-black: #0b1009;
@@ -362,14 +362,37 @@
             font-size: 15px;
         }
 
-        .channel-count {
+         .channel-count {
             color: var(--text-muted);
             font-size: 10px;
         }
 
+        .channel-filter {
+            min-width: 180px;
+            max-width: 260px;
+            padding: 7px 32px 7px 10px;
+            border: 1px solid var(--military-border);
+            border-radius: 6px;
+            background: #182314;
+            color: var(--text-main);
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .channel-filter:hover,
+        .channel-filter:focus {
+            border-color: var(--military-light);
+        }
+
+        .channel-filter option {
+            background: #182314;
+            color: var(--text-main);
+        }
+
         .channel-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: var(--grid-gap);
             padding: 16px;
         }
@@ -474,6 +497,56 @@
             .active-channel-name { max-width: 150px; font-size: 12px; padding: 4px 8px; }
             .control-row { gap: 6px; }
         }
+        /* FORCE HORIZONTAL CHANNEL HEADER */
+        .panel-title {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            gap: 10px;
+        }
+
+        .panel-title h2 {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .channel-filter {
+            flex: 0 1 220px;
+            width: 220px;
+            min-width: 160px;
+            max-width: 220px;
+        }
+
+        .panel-title .channel-count {
+            margin-left: auto;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 520px) {
+            .panel-title {
+                flex-wrap: nowrap;
+                gap: 6px;
+            }
+
+            .panel-title h2 {
+                font-size: 13px;
+            }
+
+            .channel-filter {
+                flex: 1 1 auto;
+                width: auto;
+                min-width: 120px;
+                max-width: none;
+                font-size: 11px;
+            }
+
+            .panel-title .channel-count {
+                font-size: 9px;
+            }
+        }
+
     </style>
 </head>
 
@@ -531,6 +604,9 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <h2>📺 DANH SÁCH KÊNH</h2>
+                        <select id="channelGroupFilter" class="channel-filter" title="Chọn nhóm kênh">
+                            <option value="__ALL__">Tất cả các kênh</option>
+                        </select>
                         <span id="channelCount" class="channel-count">0 kênh</span>
                     </div>
                 </div>
@@ -555,6 +631,8 @@
         const unmuteBanner = document.getElementById("unmuteBanner");
         const channelList = document.getElementById("channelList");
         const channelCount = document.getElementById("channelCount");
+        const channelGroupFilter = document.getElementById("channelGroupFilter");
+        let selectedChannelGroup = "__ALL__";
         const playBtn = document.getElementById("playBtn");
         const previousBtn = document.getElementById("previousBtn");
         const nextBtn = document.getElementById("nextBtn");
@@ -580,8 +658,8 @@
 
                 if (channels.length === 0) throw new Error("Playlist không có kênh");
 
+                buildChannelGroups();
                 renderChannels();
-                channelCount.textContent = channels.length + " kênh";
 
                 // TÌM KÊNH ANTV ĐỂ PHÁT MẶC ĐỊNH
                 let defaultIndex = channels.findIndex(ch => ch.name.toUpperCase().includes("ANTV"));
@@ -613,7 +691,8 @@
                     info = {
                         name: name,
                         logo: getAttribute(line, "tvg-logo"),
-                        id: getAttribute(line, "tvg-id")
+                        id: getAttribute(line, "tvg-id"),
+                        group: getAttribute(line, "group-title") || getAttribute(line, "tvg-group") || "Khác"
                     };
                     continue;
                 }
@@ -635,12 +714,61 @@
             return match ? (match[1] || match[2] || match[3] || "").trim() : "";
         }
 
+        function buildChannelGroups() {
+            const groups = [...new Set(
+                channels
+                    .map(channel => (channel.group || "Khác").trim())
+                    .filter(Boolean)
+            )];
+
+            groups.sort((a, b) =>
+                a.localeCompare(b, "vi", { sensitivity: "base" })
+            );
+
+            channelGroupFilter.innerHTML =
+                '<option value="__ALL__">Tất cả các kênh</option>';
+
+            groups.forEach(group => {
+                const option = document.createElement("option");
+                option.value = group;
+                option.textContent = group;
+                channelGroupFilter.appendChild(option);
+            });
+
+            channelGroupFilter.value = selectedChannelGroup;
+        }
+
+        function getFilteredChannels() {
+            if (selectedChannelGroup === "__ALL__") {
+                return channels;
+            }
+
+            return channels.filter(channel =>
+                (channel.group || "Khác").trim() === selectedChannelGroup
+            );
+        }
+
         function renderChannels() {
             channelList.innerHTML = "";
 
-            channels.forEach((channel, index) => {
+            const filteredChannels = getFilteredChannels();
+
+            channelCount.textContent =
+                filteredChannels.length + " kênh";
+
+            if (filteredChannels.length === 0) {
+                channelList.innerHTML =
+                    '<div class="empty">Không có kênh trong nhóm này.</div>';
+                return;
+            }
+
+            filteredChannels.forEach(channel => {
+                const index = channels.indexOf(channel);
+
                 const item = document.createElement("div");
-                item.className = "channel" + (index === currentChannelIndex ? " active" : "");
+                item.className =
+                    "channel" +
+                    (index === currentChannelIndex ? " active" : "");
 
                 const logoContainer = document.createElement("div");
                 logoContainer.className = "channel-logo";
@@ -654,13 +782,16 @@
                     img.src = channel.logo;
                     img.alt = channel.name;
                     img.loading = "lazy";
+
                     img.onerror = function () {
                         this.style.display = "none";
                         fallback.style.display = "flex";
                     };
+
                     logoContainer.appendChild(img);
                     fallback.style.display = "none";
                 }
+
                 logoContainer.appendChild(fallback);
 
                 const info = document.createElement("div");
@@ -681,6 +812,29 @@
                 channelList.appendChild(item);
             });
         }
+
+        channelGroupFilter.addEventListener("change", () => {
+            selectedChannelGroup = channelGroupFilter.value;
+            renderChannels();
+
+            // Khi chọn nhóm kênh, đưa ĐẦU KHUNG DANH SÁCH KÊNH
+            // lên đúng đầu vùng nhìn, để vẫn thấy tiêu đề + ô chọn nhóm.
+            requestAnimationFrame(() => {
+                const panel = document.querySelector(".panel");
+
+                if (panel) {
+                    const panelTop =
+                        panel.getBoundingClientRect().top +
+                        window.pageYOffset;
+
+                    window.scrollTo({
+                        top: Math.max(0, panelTop - 8),
+                        left: 0,
+                        behavior: "smooth"
+                    });
+                }
+            });
+        });
 
         function playChannelByIndex(index, scrollToTop = true, isInitialAutoplay = false) {
             if (index < 0 || index >= channels.length) return;
