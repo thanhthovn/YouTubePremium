@@ -276,17 +276,6 @@
             border-color: #e14a4a;
         }
 
-        /* Đang phát: nút Pause trở về màu xanh quân đội ban đầu */
-        .play-btn.playing {
-            background: rgba(38,59,32,.92);
-            border-color: rgba(126,148,82,.45);
-        }
-
-        .play-btn.playing:hover {
-            background: var(--military-light);
-            border-color: rgba(126,148,82,.45);
-        }
-
         .current-channel-btn {
             color: #82c341;
             font-size: 20px;
@@ -495,12 +484,7 @@
             <section class="player-wrapper">
                 <div id="player" class="player">
                     <video id="video" playsinline preload="metadata"></video>
-
-                    <div id="unmuteBanner" class="unmute-banner hidden">
-                        🔊 Nhấp vào đây để bật tiếng
-                    </div>
-
-                    <div id="playerOverlay" class="player-overlay">
+<div id="playerOverlay" class="player-overlay">
                         Đang tải danh sách kênh...
                     </div>
 
@@ -541,7 +525,7 @@
             <aside class="panel">
                 <div class="panel-header">
                     <div class="panel-title">
-                        <h2>📺 KÊNH TIVI</h2>
+                        <h2>📺 DANH SÁCH KÊNH</h2>
                         <span id="channelCount" class="channel-count">0 kênh</span>
                     </div>
                 </div>
@@ -728,10 +712,8 @@
 
             video.pause();
 
-            if (isInitialAutoplay) {
-                video.muted = true;
-                unmuteBanner.classList.remove("hidden");
-            }
+            video.muted = false;
+            video.volume = 1;
 
             playerOverlay.style.color = "#88937d";
             playerOverlay.classList.remove("hidden");
@@ -785,16 +767,9 @@
             playerOverlay.textContent = "KÊNH NÀY KHÔNG PHÁT ĐƯỢC, VUI LÒNG CHỌN KÊNH KHÁC!";
             updatePlayButton();
         }
+
         function updatePlayButton() {
-            if (video.paused) {
-                // Đang dừng: nút Play màu đỏ
-                playBtn.textContent = "▶";
-                playBtn.classList.remove("playing");
-            } else {
-                // Đang phát: nút Pause màu xanh quân đội ban đầu
-                playBtn.textContent = "⏸";
-                playBtn.classList.add("playing");
-            }
+            playBtn.textContent = video.paused ? "▶" : "⏸";
         }
 
         function toggleFullscreen() {
@@ -841,178 +816,12 @@
                 }
             });
 
-            playBtn.addEventListener("click", async () => {
-
-                /* =================================================
-                   ĐANG PHÁT -> PAUSE
-                ================================================== */
-
-                if (!video.paused) {
-
+            playBtn.addEventListener("click", () => {
+                if (video.paused) {
+                    video.play().catch(() => {});
+                } else {
                     video.pause();
-
-                    updatePlayButton();
-
-                    return;
-
                 }
-
-
-                /* =================================================
-                   ĐANG PAUSE -> PLAY
-                   Với IPTV LIVE, đưa video về live edge trước
-                   khi phát lại để tránh đứng ở vị trí cũ.
-                ================================================== */
-
-                try {
-
-                    if (hls) {
-
-                        /*
-                         * Cho HLS.js tải playlist/segment lại.
-                         */
-                        if (typeof hls.startLoad === "function") {
-                            hls.startLoad(-1);
-                        }
-
-
-                        /*
-                         * Tìm vị trí LIVE mới nhất.
-                         */
-                        let livePosition = null;
-
-
-                        if (
-                            hls.liveSyncPosition != null &&
-                            isFinite(hls.liveSyncPosition)
-                        ) {
-
-                            livePosition =
-                                hls.liveSyncPosition;
-
-                        }
-
-
-                        /*
-                         * Nếu liveSyncPosition chưa có,
-                         * lấy cuối vùng seekable của video.
-                         */
-                        if (
-                            livePosition == null &&
-                            video.seekable &&
-                            video.seekable.length > 0
-                        ) {
-
-                            livePosition =
-                                video.seekable.end(
-                                    video.seekable.length - 1
-                                );
-
-                        }
-
-
-                        /*
-                         * Đưa về live edge.
-                         */
-                        if (
-                            livePosition != null &&
-                            isFinite(livePosition)
-                        ) {
-
-                            try {
-
-                                video.currentTime =
-                                    livePosition;
-
-                            }
-                            catch (seekError) {
-
-                                console.warn(
-                                    "Không thể seek về live edge:",
-                                    seekError
-                                );
-
-                            }
-
-                        }
-
-                    }
-
-
-                    /*
-                     * Thử phát lại.
-                     */
-                    await video.play();
-
-                    updatePlayButton();
-
-                }
-                catch (error) {
-
-                    console.warn(
-                        "Play lại lần 1 thất bại:",
-                        error
-                    );
-
-
-                    /*
-                     * Nếu MediaElement bị lỗi,
-                     * thử khôi phục HLS.js rồi phát lại.
-                     */
-                    try {
-
-                        if (hls) {
-
-                            if (
-                                typeof hls.startLoad === "function"
-                            ) {
-
-                                hls.startLoad(-1);
-
-                            }
-
-
-                            if (
-                                typeof hls.recoverMediaError === "function"
-                            ) {
-
-                                hls.recoverMediaError();
-
-                            }
-
-                        }
-
-
-                        await new Promise(
-                            resolve =>
-                                setTimeout(
-                                    resolve,
-                                    300
-                                )
-                        );
-
-
-                        await video.play();
-
-                        updatePlayButton();
-
-                    }
-                    catch (retryError) {
-
-                        console.error(
-                            "Không thể Play lại luồng:",
-                            retryError
-                        );
-
-                        /*
-                         * Cập nhật lại icon về trạng thái thực tế.
-                         */
-                        updatePlayButton();
-
-                    }
-
-                }
-
             });
 
             video.addEventListener("play", updatePlayButton);
