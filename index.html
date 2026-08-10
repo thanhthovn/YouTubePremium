@@ -689,8 +689,7 @@
 
                             <div class="control-spacer"></div>
 
-                            <!-- 5. NÚT MỞ TAB MỚI (ĐỂ FULLSCREEN TRÊN GOOGLE SITES) & NÚT TOÀN MÀN HÌNH -->
-                            <button id="openNewTabBtn" class="control-btn" type="button" title="Mở trang riêng (để xem Fullscreen)">🌐</button>
+                            <!-- 5. NÚT TOÀN MÀN HÌNH -->
                             <button id="fullscreenBtn" class="control-btn" type="button" title="Toàn màn hình">⛶</button>
                         </div>
                     </div>
@@ -735,7 +734,6 @@
         const nextBtn = document.getElementById("nextBtn");
         const currentChannelBtn = document.getElementById("currentChannelBtn");
         const progress = document.getElementById("progress");
-        const openNewTabBtn = document.getElementById("openNewTabBtn");
         const fullscreenBtn = document.getElementById("fullscreenBtn");
         const activeChannelLogo = document.getElementById("activeChannelLogo");
         const activeChannelName = document.getElementById("activeChannelName");
@@ -1112,17 +1110,6 @@
                     inline: "center"
                 });
             });
-
-            // MỞ XEM TRONG TAB MỚI NẾU BỊ VƯỚNG KHÓA FULLSCREEN CỦA GOOGLE SITES
-            if (openNewTabBtn) {
-                openNewTabBtn.addEventListener("click", () => {
-                    const newWindow = window.open();
-                    if (newWindow) {
-                        newWindow.document.write(document.documentElement.outerHTML);
-                        newWindow.document.close();
-                    }
-                });
-            }
 
             fullscreenBtn.addEventListener("click", (e) => {
                 e.preventDefault();
