@@ -311,12 +311,6 @@ https://liveh34.vtvprime.vn/hls/SCTV22/04.m3u8
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57
 https://liveh12.vtvprime.vn/hls/SCTVPHIM/03.m3u8
 
-#EXTINF:-1 tvg-id="onfootball" group-title="🛰️VTVcab" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/onfootball.png", ON Football HD (HD 8.5Mbps)
-http://hothanhdam:thanhdam1010@tvh.hothanhdam.dsmynas.com/stream/channelid/1693157158?profile=pass
-#EXTINF:-1 tvg-id="onsportsplus" group-title="🛰️VTVcab" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/onsportsplus.png", ON Sports+ (HD 8Mbps)
-http://hothanhdam:thanhdam1010@tvh.hothanhdam.dsmynas.com/stream/channelid/942730291?profile=pass
-#EXTINF:-1 tvg-id="onsports" group-title="🛰️VTVcab" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/onsports.png", ON Sports HD (HD 8.5Mbps)
-http://hothanhdam:thanhdam1010@tvh.hothanhdam.dsmynas.com/stream/channelid/1863140476?profile=pass
 
 #EXTINF:-1 tvg-id="onviegiaitri" group-title="🛰️VTVcab" tvg-logo="https://img.vtvprime.vn/gV1k4G1mCGQpnNGJFCJQISd0-p96jY14Ufz_mOb8h_o/rs:fit:836:468/czM6Ly9wcmQtc24taW1hZ2VzL2NoYW5uZWwvZjVhZDhkNmItMTQ4NS00YjYxLThhMDEtNTdiYzBiMjU2NGU1LnBuZw==.png", ON Vie Giải Trí
 https://freem3u.xyz/api/live/play.m3u8?vid=180
@@ -414,27 +408,6 @@ https://vip.opstream16.com/20220303/476_47af98b7/3000k/hls/mixed.m3u8
 https://vip.opstream13.com/20251028/14850_db0d4963/3000k/hls/mixed.m3u8
 #EXTINF:-1 group-title="🎬LẬT MẶT SERIES🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/latmat6.png", Lật Mặt 6: Tấm Vé Định Mệnh
 https://vip.opstream17.com/20240318/2854_137bf151/3000k/hls/mixed.m3u8
-
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 1
-https://vip.opstream17.com/20251002/19009_3883cd64/3000k/hls/mixed.m3u8
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 2
-https://vip.opstream17.com/20251002/19010_ac55b967/3000k/hls/mixed.m3u8
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 3
-https://vip.opstream17.com/20251003/19011_4839e940/3000k/hls/mixed.m3u8
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 4
-https://vip.opstream17.com/20251003/19012_e35026a2/3000k/hls/mixed.m3u8
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 5
-https://vip.opstream17.com/20251003/19013_edd6a7e0/3000k/hls/mixed.m3u8
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 6
-https://vip.opstream17.com/20251003/19014_4e8f015d/3000k/hls/mixed.m3u8
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 7
-https://vip.opstream17.com/20251003/19015_a4e1d10a/3000k/hls/mixed.m3u8
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 8
-https://vip.opstream17.com/20251003/19016_16e12822/3000k/hls/mixed.m3u8
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 9
-https://vip.opstream17.com/20251003/19017_6d3b4379/3000k/hls/mixed.m3u8
-#EXTINF:-1 group-title="🎬CÂY TÁO NỞ HOA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caytaonohoa.png", Cây Táo Nở Hoa - Tập 10
-
 
 
 #EXTINF:-1 group-title="🎬CINEMA🎥" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/slgsl.png", Siêu Lừa Gặp Siêu Lầy
