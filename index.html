@@ -212,6 +212,23 @@
             background: linear-gradient(to top, rgba(5,8,4,.98), rgba(5,8,4,.88), transparent);
         }
 
+        /* ẨN THANH ĐIỀU KHIỂN KHI KHÔNG TƯƠNG TÁC */
+        .video-controls {
+            transition: opacity .25s ease, transform .25s ease;
+        }
+
+        .video-controls.controls-hidden {
+            opacity: 0;
+            transform: translateY(100%);
+            pointer-events: none;
+        }
+
+        .player.controls-active .video-controls {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
         /* Thanh chứa thanh thời gian */
         .progress-row {
             width: 100%;
@@ -1061,6 +1078,97 @@
         }
 
         function setupEventListeners() {
+            // =========================================================
+            // TỰ ẨN / HIỆN THANH ĐIỀU KHIỂN PLAYER
+            // - Di chuột vào player: hiện thanh điều khiển.
+            // - Di chuột ra khỏi player: sau 1 giây sẽ ẩn.
+            // - Di chuyển chuột trong player: hiện lại và đặt lại bộ đếm.
+            // - Khi rê trực tiếp lên thanh điều khiển: giữ thanh đang hiện.
+            // =========================================================
+            let controlsHideTimer = null;
+            const videoControls = document.querySelector(".video-controls");
+
+            function showVideoControls() {
+                if (!videoControls) return;
+
+                clearTimeout(controlsHideTimer);
+                player.classList.add("controls-active");
+                videoControls.classList.remove("controls-hidden");
+            }
+
+            function hideVideoControls(delay = 1000) {
+                if (!videoControls) return;
+
+                clearTimeout(controlsHideTimer);
+                controlsHideTimer = setTimeout(() => {
+                    if (!video.paused && !videoControls.matches(":hover")) {
+                        videoControls.classList.add("controls-hidden");
+                        player.classList.remove("controls-active");
+                    }
+                }, delay);
+            }
+
+            if (videoControls) {
+                player.addEventListener("mouseenter", showVideoControls);
+                player.addEventListener("mousemove", showVideoControls);
+                player.addEventListener("mouseleave", () => {
+                    if (!document.fullscreenElement && !document.webkitFullscreenElement && !video.paused) {
+                        hideVideoControls(1000);
+                    }
+                });
+
+                videoControls.addEventListener("mouseenter", showVideoControls);
+                videoControls.addEventListener("mousemove", showVideoControls);
+                videoControls.addEventListener("mouseleave", () => {
+                    if (!video.paused) hideVideoControls(700);
+                });
+
+                // FULLSCREEN: một số trình duyệt không kích hoạt mouseenter/mouseleave
+                // của player ổn định, nên nghe mousemove trực tiếp trên document.
+                document.addEventListener("mousemove", (e) => {
+                    const isFullscreen = !!(
+                        document.fullscreenElement ||
+                        document.webkitFullscreenElement ||
+                        document.mozFullScreenElement ||
+                        document.msFullscreenElement
+                    );
+
+                    if (!isFullscreen) return;
+
+                    // Chỉ xử lý khi con trỏ đang nằm trong vùng player fullscreen.
+                    const rect = player.getBoundingClientRect();
+                    const insidePlayer =
+                        e.clientX >= rect.left &&
+                        e.clientX <= rect.right &&
+                        e.clientY >= rect.top &&
+                        e.clientY <= rect.bottom;
+
+                    if (insidePlayer) {
+                        showVideoControls();
+
+                        // Khi đang rê chuột bình thường, thanh hiện.
+                        // Dừng chuột khoảng 1.5 giây thì tự ẩn.
+                        if (!video.paused) hideVideoControls(1500);
+                    }
+                });
+
+                document.addEventListener("fullscreenchange", () => {
+                    if (document.fullscreenElement === player) {
+                        showVideoControls();
+                    } else {
+                        showVideoControls();
+                    }
+                });
+
+                document.addEventListener("webkitfullscreenchange", () => {
+                    showVideoControls();
+                });
+            }
+
+            video.addEventListener("play", () => hideVideoControls(1800));
+            video.addEventListener("pause", showVideoControls);
+            video.addEventListener("ended", showVideoControls);
+
             unmuteBanner.addEventListener("click", () => {
                 video.muted = false;
                 unmuteBanner.classList.add("hidden");
