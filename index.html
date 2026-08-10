@@ -521,6 +521,31 @@
         }
 
         /* Ô chọn nhóm kênh */
+        /* Ô chọn playlist */
+        .playlist-filter {
+            width: 150px;
+            min-width: 140px;
+            max-width: 180px;
+            padding: 7px 30px 7px 10px;
+            border: 1px solid var(--military-border);
+            border-radius: 6px;
+            background: #182314;
+            color: var(--text-main);
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .playlist-filter:hover,
+        .playlist-filter:focus {
+            border-color: var(--military-light);
+        }
+
+        .playlist-filter option {
+            background: #182314;
+            color: var(--text-main);
+        }
+
         .channel-filter {
             min-width: 180px;
             max-width: 260px;
@@ -712,6 +737,13 @@
                 font-size: 13px;
             }
 
+            .playlist-filter {
+                width: 120px;
+                min-width: 110px;
+                max-width: 150px;
+                font-size: 11px;
+            }
+
             .channel-filter {
                 flex: 1 1 auto;
                 width: auto;
@@ -795,8 +827,14 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <h2>📺 DANH SÁCH KÊNH</h2>
+
+                        <select id="playlistSelect" class="playlist-filter" title="Chọn danh sách">
+                            <option value="tv">KÊNH TIVI</option>
+                            <option value="cinemax">CINEMAX</option>
+                        </select>
+
                         <select id="channelGroupFilter" class="channel-filter" title="Chọn nhóm kênh">
-                            <option value="__ALL__">Tất cả các kênh</option>
+                            <option value="__ALL__">Tất cả</option>
                         </select>
                         <span id="channelCount" class="channel-count">0 kênh</span>
                     </div>
@@ -810,7 +848,24 @@
     </main>
 
     <script>
-        const M3U_URL = "https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/main/TRUYENHINHCAPVIETNAM.m3u";
+        // =========================================================
+        // CÁC PLAYLIST
+        // =========================================================
+        const PLAYLISTS = [
+            {
+                id: "tv",
+                name: "KÊNH TIVI",
+                url: "https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/main/TRUYENHINHCAPVIETNAM.m3u"
+            },
+            {
+                id: "cinemax",
+                name: "CINEMAX",
+                url: "https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/main/CINEMAX.m3u"
+            }
+        ];
+
+        let currentPlaylistId = "tv";
+        let M3U_URL = PLAYLISTS[0].url;
 
         let channels = [];
         let currentChannelIndex = -1;
@@ -823,6 +878,7 @@
         const unmuteBanner = document.getElementById("unmuteBanner");
         const channelList = document.getElementById("channelList");
         const channelCount = document.getElementById("channelCount");
+        const playlistSelect = document.getElementById("playlistSelect");
         const channelGroupFilter = document.getElementById("channelGroupFilter");
         let selectedChannelGroup = "__ALL__";
         const playBtn = document.getElementById("playBtn");
@@ -972,9 +1028,36 @@
         const activeChannelName = document.getElementById("activeChannelName");
 
         window.addEventListener("DOMContentLoaded", () => {
-            loadPlaylist();
+            playlistSelect.value = currentPlaylistId;
             setupEventListeners();
+            loadPlaylist();
         });
+
+        async function switchPlaylist(playlistId) {
+            const playlist = PLAYLISTS.find(item => item.id === playlistId);
+            if (!playlist) return;
+
+            currentPlaylistId = playlist.id;
+            M3U_URL = playlist.url;
+
+            // Reset nhóm kênh khi chuyển sang playlist khác.
+            selectedChannelGroup = "__ALL__";
+
+            if (playlistSelect) {
+                playlistSelect.value = playlist.id;
+            }
+
+            if (channelGroupFilter) {
+                channelGroupFilter.value = "__ALL__";
+            }
+
+            // Xóa danh sách cũ trong lúc tải list mới.
+            channelList.innerHTML =
+                '<div class="loading">⏳ Đang tải danh sách...</div>';
+            channelCount.textContent = "0 kênh";
+
+            await loadPlaylist();
+        }
 
         async function loadPlaylist() {
             try {
@@ -989,9 +1072,20 @@
                 buildChannelGroups();
                 renderChannels();
 
-                // TÌM KÊNH ANTV ĐỂ PHÁT MẶC ĐỊNH
-                let defaultIndex = channels.findIndex(ch => ch.name.toUpperCase().includes("ANTV"));
-                if (defaultIndex === -1) defaultIndex = 0;
+                // KÊNH MẶC ĐỊNH
+                // KÊNH TIVI: ưu tiên ANTV như trước.
+                // CINEMAX: phát mục đầu tiên của playlist.
+                let defaultIndex = 0;
+
+                if (currentPlaylistId === "tv") {
+                    defaultIndex = channels.findIndex(ch =>
+                        ch.name.toUpperCase().includes("ANTV")
+                    );
+
+                    if (defaultIndex === -1) {
+                        defaultIndex = 0;
+                    }
+                }
 
                 playChannelByIndex(defaultIndex, false, true);
 
@@ -1054,7 +1148,7 @@
             );
 
             channelGroupFilter.innerHTML =
-                '<option value="__ALL__">Tất cả các kênh</option>';
+                '<option value="__ALL__">Tất cả</option>';
 
             groups.forEach(group => {
                 const option = document.createElement("option");
@@ -1341,6 +1435,10 @@
         }
 
         function setupEventListeners() {
+            playlistSelect.addEventListener("change", async () => {
+                await switchPlaylist(playlistSelect.value);
+            });
+
             if (videoControls) {
                 player.addEventListener("mouseenter", showVideoControls);
                 player.addEventListener("mousemove", showVideoControls);
