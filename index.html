@@ -172,6 +172,34 @@
         }
 
         /* =========================================================
+           TÊN WEBSITE GÓC PHẢI TRÊN PLAYER
+           ========================================================= */
+        .player-title {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            z-index: 15;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity .25s ease, transform .25s ease;
+            pointer-events: none;
+        }
+
+        .player-title.title-hidden {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        /* =========================================================
            11. THÔNG BÁO BẬT ÂM THANH
            ========================================================= */
         /* THÔNG BÁO BẬT ÂM THANH */
@@ -708,6 +736,11 @@
                 <div id="player" class="player">
                     <video id="video" playsinline preload="metadata"></video>
 
+                    <!-- TÊN WEBSITE GÓC PHẢI TRÊN PLAYER -->
+                    <div id="playerTitle" class="player-title">
+                         ThánhThơ©2026
+                    </div>
+
                     <div id="unmuteBanner" class="unmute-banner hidden">
                         🔊 Nhấp vào đây để bật tiếng
                     </div>
@@ -786,6 +819,7 @@
         const player = document.getElementById("player");
         const video = document.getElementById("video");
         const playerOverlay = document.getElementById("playerOverlay");
+        const playerTitle = document.getElementById("playerTitle");
         const unmuteBanner = document.getElementById("unmuteBanner");
         const channelList = document.getElementById("channelList");
         const channelCount = document.getElementById("channelCount");
@@ -1181,6 +1215,9 @@
             playerOverlay.classList.remove("hidden");
             playerOverlay.textContent = `Đang tải: ${channel.name}...`;
 
+            // Mỗi lần chuyển kênh, hiện lại tên website + thanh điều khiển.
+            showVideoControls();
+
             const url = channel.url;
 
             if (video.canPlayType("application/vnd.apple.mpegurl")) {
@@ -1266,37 +1303,44 @@
             }
         }
 
-        function setupEventListeners() {
-            // =========================================================
-            // TỰ ẨN / HIỆN THANH ĐIỀU KHIỂN PLAYER
-            // - Di chuột vào player: hiện thanh điều khiển.
-            // - Di chuột ra khỏi player: sau 1 giây sẽ ẩn.
-            // - Di chuyển chuột trong player: hiện lại và đặt lại bộ đếm.
-            // - Khi rê trực tiếp lên thanh điều khiển: giữ thanh đang hiện.
-            // =========================================================
-            let controlsHideTimer = null;
-            const videoControls = document.querySelector(".video-controls");
+        // =========================================================
+        // TỰ ẨN / HIỆN THANH ĐIỀU KHIỂN PLAYER + TÊN WEBSITE
+        // Các hàm này phải nằm ngoài setupEventListeners() để
+        // playChannelByIndex() và các hàm khác cũng gọi được.
+        // =========================================================
+        let controlsHideTimer = null;
+        const videoControls = document.querySelector(".video-controls");
 
-            function showVideoControls() {
-                if (!videoControls) return;
+        function showVideoControls() {
+            if (!videoControls) return;
 
-                clearTimeout(controlsHideTimer);
-                player.classList.add("controls-active");
-                videoControls.classList.remove("controls-hidden");
+            clearTimeout(controlsHideTimer);
+            player.classList.add("controls-active");
+            videoControls.classList.remove("controls-hidden");
+
+            if (playerTitle) {
+                playerTitle.classList.remove("title-hidden");
             }
+        }
 
-            function hideVideoControls(delay = 1000) {
-                if (!videoControls) return;
+        function hideVideoControls(delay = 1000) {
+            if (!videoControls) return;
 
-                clearTimeout(controlsHideTimer);
-                controlsHideTimer = setTimeout(() => {
-                    if (!video.paused && !videoControls.matches(":hover")) {
-                        videoControls.classList.add("controls-hidden");
-                        player.classList.remove("controls-active");
+            clearTimeout(controlsHideTimer);
+
+            controlsHideTimer = setTimeout(() => {
+                if (!video.paused && !videoControls.matches(":hover")) {
+                    videoControls.classList.add("controls-hidden");
+                    player.classList.remove("controls-active");
+
+                    if (playerTitle) {
+                        playerTitle.classList.add("title-hidden");
                     }
-                }, delay);
-            }
+                }
+            }, delay);
+        }
 
+        function setupEventListeners() {
             if (videoControls) {
                 player.addEventListener("mouseenter", showVideoControls);
                 player.addEventListener("mousemove", showVideoControls);
