@@ -736,6 +736,12 @@
                             <button id="previousBtn" class="control-btn" type="button" title="Kênh trước">⏮</button>
                             <button id="playBtn" class="control-btn play-btn" type="button" title="Phát / Tạm dừng">▶</button>
                             <button id="nextBtn" class="control-btn" type="button" title="Kênh tiếp theo">⏭</button>
+                            <!-- NÚT TUA LÙI 10 GIÂY -->
+                            <button id="rewind10Btn" class="control-btn" type="button" title="Lùi 10 giây">⟲</button>
+
+                            <!-- NÚT TUA TỚI 10 GIÂY -->
+                            <button id="forward10Btn" class="control-btn" type="button" title="Tới 10 giây">⟳</button>
+
                             <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>
 
                             <!-- 4. KHU VỰC CHỮ LIVE VỚI CHẤM ĐỎ -->
@@ -790,6 +796,8 @@
         const previousBtn = document.getElementById("previousBtn");
         const nextBtn = document.getElementById("nextBtn");
         const currentChannelBtn = document.getElementById("currentChannelBtn");
+        const rewind10Btn = document.getElementById("rewind10Btn");
+        const forward10Btn = document.getElementById("forward10Btn");
         const progress = document.getElementById("progress");
         const currentTimeEl = document.getElementById("currentTime");
         const durationTimeEl = document.getElementById("durationTime");
@@ -1361,23 +1369,60 @@
 
             // Kéo thanh để tua nếu stream có duration hữu hạn.
             // Kéo cục tròn để tua ngay trong lúc đang kéo.
+            // Khi đang kéo: CHỈ di chuyển cục kéo và cập nhật thời gian xem trước.
+            // Không đổi video.currentTime liên tục vì HLS có thể bị treo nếu
+            // nhận quá nhiều lệnh seek trong cùng một lần kéo.
             progress.addEventListener("input", () => {
                 const range = getSeekableRange();
                 if (!progressSeekable || !range) return;
 
                 const percent = Math.max(0, Math.min(100, Number(progress.value))) / 100;
-                const target = range.start + percent * (range.end - range.start);
+                setProgressVisual(percent * 100);
 
-                if (Number.isFinite(target)) {
-                    video.currentTime = target;
-                    setProgressVisual(percent * 100);
-                    currentTimeEl.textContent =
-                        formatTime(target - range.start);
-                }
+                const previewTime =
+                    percent * (range.end - range.start);
+
+                currentTimeEl.textContent = formatTime(previewTime);
             });
 
-            // Khi thả chuột/ngón tay, chốt lại vị trí tua.
-            progress.addEventListener("change", seekFromProgress);
+            // Chỉ seek 1 lần khi người dùng THẢ cục kéo.
+            let seekInProgress = false;
+            let seekUnlockTimer = null;
+
+            function performStableSeek() {
+                if (seekInProgress) return;
+
+                const range = getSeekableRange();
+                if (!progressSeekable || !range) return;
+
+                const percent =
+                    Math.max(0, Math.min(100, Number(progress.value))) / 100;
+
+                const target =
+                    range.start + percent * (range.end - range.start);
+
+                if (!Number.isFinite(target)) return;
+
+                seekInProgress = true;
+                video.currentTime = target;
+
+                currentTimeEl.textContent =
+                    formatTime(target - range.start);
+
+                clearTimeout(seekUnlockTimer);
+                seekUnlockTimer = setTimeout(() => {
+                    seekInProgress = false;
+                }, 1800);
+            }
+
+            video.addEventListener("seeked", () => {
+                seekInProgress = false;
+                clearTimeout(seekUnlockTimer);
+                updateProgressState();
+            });
+
+            // Khi thả chuột/ngón tay, thực hiện đúng 1 lần tua.
+            progress.addEventListener("change", performStableSeek);
 
             unmuteBanner.addEventListener("click", () => {
                 video.muted = false;
@@ -1411,6 +1456,35 @@
                 if (channels.length === 0) return;
                 const nextIndex = (currentChannelIndex + 1) % channels.length;
                 playChannelByIndex(nextIndex, true, false);
+            });
+
+            // =========================================================
+            // TUA 10 GIÂY TRƯỚC / SAU
+            // =========================================================
+            function seekBySeconds(seconds) {
+                const range = getSeekableRange();
+
+                // Stream live-only không có vùng tua.
+                if (!range) return;
+
+                let target = video.currentTime + seconds;
+
+                // Giới hạn trong vùng mà stream cho phép tua.
+                target = Math.max(range.start, Math.min(range.end, target));
+
+                if (Number.isFinite(target)) {
+                    video.currentTime = target;
+                }
+            }
+
+            // Lùi 10 giây
+            rewind10Btn.addEventListener("click", () => {
+                seekBySeconds(-10);
+            });
+
+            // Tới 10 giây
+            forward10Btn.addEventListener("click", () => {
+                seekBySeconds(10);
             });
 
             // ĐI TỚI KÊNH ĐANG PHÁT
