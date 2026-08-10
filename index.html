@@ -8,10 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <style>
-        /* =========================================================
-           1. BIẾN GIAO DIỆN DÙNG CHUNG
-           - Chỉnh các thông số ở đây để thay đổi giao diện nhanh.
-           ========================================================= */
         :root {
             --logo-size: 250px;
             --channel-name-size: 30px;
@@ -27,39 +23,24 @@
             --text-muted: #a8b19b;
         }
 
-        /* =========================================================
-           2. RESET CSS
-           - Xóa margin/padding mặc định của trình duyệt.
-           - box-sizing giúp tính kích thước dễ kiểm soát hơn.
-           ========================================================= */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        /* Cuộn trang mượt khi dùng scrollIntoView / scrollTo */
         html {
             scroll-behavior: smooth;
         }
 
-        /* =========================================================
-           3. TOÀN TRANG
-           - Chiều rộng, chiều cao tối thiểu, font, màu chữ và nền.
-           ========================================================= */
         html, body {
             width: 100%;
             min-height: 100%;
-            font-family: sans-serif, Arial, Helvetica ;
+            font-family: sans-serif, Arial, Helvetica;
             color: var(--text-main);
             background: var(--military-black);
         }
 
-        /* =========================================================
-           4. NỀN QUÂN ĐỘI
-           - Lớp nền cố định phía sau toàn bộ website.
-           - Các radial-gradient tạo các vùng sáng tối kiểu quân đội.
-           ========================================================= */
         body::before {
             content: "";
             position: fixed;
@@ -73,10 +54,6 @@
                 linear-gradient(135deg, #0b1009, #1c2817 35%, #11180e 70%, #28381f);
         }
 
-        /* =========================================================
-           5. KHUNG BAO NGOÀI
-           - Giới hạn chiều rộng website và tạo khoảng đệm hai bên.
-           ========================================================= */
         .container {
             width: 100%;
             max-width: 1700px;
@@ -84,20 +61,12 @@
             padding: 18px;
         }
 
-        /* =========================================================
-           6. BỐ CỤC CHÍNH
-           - Trình phát ở trên, danh sách kênh ở dưới.
-           ========================================================= */
         .layout {
             display: flex;
             flex-direction: column;
             gap: 18px;
         }
 
-        /* =========================================================
-           7. PLAYER - KHU VỰC TRÌNH PHÁT
-           ========================================================= */
-        /* PLAYER */
         .player-wrapper {
             width: 100%;
             order: 1;
@@ -114,11 +83,6 @@
             box-shadow: 0 8px 25px rgba(0,0,0,.5);
         }
 
-        /* =========================================================
-           8. FULLSCREEN
-           - Đảm bảo player chiếm toàn màn hình khi được phép.
-           ========================================================= */
-        /* FULLSCREEN COMPATIBILITY */
         .player:fullscreen,
         .player:-webkit-full-screen,
         .player:-moz-full-screen,
@@ -135,10 +99,6 @@
             align-items: center !important;
         }
 
-        /* =========================================================
-           9. VIDEO
-           - Video lấp đầy khung player nhưng giữ đúng tỷ lệ nội dung.
-           ========================================================= */
         video {
             width: 100%;
             height: 100%;
@@ -147,10 +107,6 @@
             object-fit: contain;
         }
 
-        /* =========================================================
-           10. LỚP THÔNG BÁO TRÊN VIDEO
-           - Dùng khi đang tải hoặc báo lỗi.
-           ========================================================= */
         .player-overlay {
             position: absolute;
             inset: 0;
@@ -171,9 +127,6 @@
             display: none;
         }
 
-        /* =========================================================
-           TÊN WEBSITE GÓC PHẢI TRÊN PLAYER
-           ========================================================= */
         .player-title {
             position: absolute;
             top: 14px;
@@ -199,10 +152,6 @@
             transform: translateY(-10px);
         }
 
-        /* =========================================================
-           11. THÔNG BÁO BẬT ÂM THANH
-           ========================================================= */
-        /* THÔNG BÁO BẬT ÂM THANH */
         .unmute-banner {
             position: absolute;
             top: 15px;
@@ -226,10 +175,6 @@
             display: none;
         }
 
-        /* =========================================================
-           12. THANH ĐIỀU KHIỂN VIDEO
-           ========================================================= */
-        /* CONTROLS */
         .video-controls {
             position: absolute;
             left: 0;
@@ -238,10 +183,6 @@
             z-index: 20;
             padding: 10px 12px 11px;
             background: linear-gradient(to top, rgba(5,8,4,.98), rgba(5,8,4,.88), transparent);
-        }
-
-        /* ẨN THANH ĐIỀU KHIỂN KHI KHÔNG TƯƠNG TÁC */
-        .video-controls {
             transition: opacity .25s ease, transform .25s ease;
         }
 
@@ -257,19 +198,11 @@
             pointer-events: auto;
         }
 
-        /* Thanh chứa thanh thời gian */
         .progress-row {
             width: 100%;
             margin-bottom: -95px;
         }
 
-        /* =========================================================
-           13. THANH THỜI GIAN
-           - width: chiều dài.
-           - height: độ dày.
-           - background: màu nền.
-           - margin-bottom ở trên đang được giữ nguyên theo bản gốc.
-           ========================================================= */
         .progress-time-row {
             display: flex;
             align-items: center;
@@ -301,13 +234,11 @@
             outline: none;
         }
 
-        /* Khi stream là live-only, thanh vẫn hiển thị nhưng không cho kéo */
         .progress.live-only {
             cursor: default;
             opacity: .85;
         }
 
-        /* Nút tròn dùng để kéo vị trí thời gian trên Chrome/Edge/Opera */
         .progress::-webkit-slider-thumb {
             appearance: none;
             -webkit-appearance: none;
@@ -328,7 +259,6 @@
             cursor: pointer;
         }
 
-        /* Hàng chứa logo, tên kênh và các nút điều khiển */
         .control-row {
             display: flex;
             align-items: center;
@@ -336,38 +266,24 @@
             width: 100%;
         }
 
-        /* =========================================================
-           14. LOGO KÊNH ĐANG PHÁT
-           ========================================================= */
-        /* LOGO KÊNH ĐẶT Ở ĐẦU TIÊN (100px x 100px) */
         .standalone-logo {
             width: 100px;
             height: 100px;
             object-fit: contain;
             padding: 4px;
-            display: none; /* Hiển thị khi có logo */
+            display: none;
             flex-shrink: 0;
         }
 
-        /* =========================================================
-           15. TÊN KÊNH ĐANG PHÁT
-           - Đây là tên nằm trên thanh điều khiển.
-           - Không phải tên kênh dưới logo trong danh sách.
-           ========================================================= */
-        /* TÊN KÊNH LINH ĐỘNG (ĐÃ MỞ RỘNG & CĂN GIỮA) */
         .active-channel-name {
             font-size: clamp(20px, 10vw, 25px);
             font-weight: bold;
             color: #ffffff;
             white-space: nowrap;
             overflow: hidden;
-            display: none; /* Hiển thị khi có kênh */
-            
-            /* Tự co giãn linh hoạt & Đã mở rộng chiều rộng tối đa */
+            display: none;
             flex: 0 1 auto;
             max-width: clamp(180px, 50vw, 800px);
-            
-            /* Căn giữa chữ trong khung */
             text-align: center;
             justify-content: center;
             align-items: center;
@@ -376,12 +292,8 @@
             border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.15);
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-             }
+        }
 
-        /* =========================================================
-           16. NÚT ĐIỀU KHIỂN
-           - Dùng chung cho nút trước, play/pause, next, kênh hiện tại...
-           ========================================================= */
         .control-btn {
             width: 40px;
             height: 36px;
@@ -406,7 +318,6 @@
             transform: scale(.94);
         }
 
-        /* Nút Play/Pause - màu đỏ */
         .play-btn {
             width: 44px;
             font-size: 19px;
@@ -419,7 +330,6 @@
             border-color: #e14a4a;
         }
 
-        /* Nút mũi tên đưa về kênh đang phát */
         .current-channel-btn {
             color: #82c341;
             font-size: 20px;
@@ -430,10 +340,6 @@
             color: #a6e063;
         }
 
-        /* =========================================================
-           17. THẺ LIVE
-           ========================================================= */
-        /* THẺ LIVE RIÊNG */
         .time-badge {
             display: flex;
             align-items: center;
@@ -457,18 +363,9 @@
         }
 
         @keyframes pulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            }
-            70% {
-                transform: scale(1.1);
-                box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-            }
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
         .live-text {
@@ -478,15 +375,10 @@
             letter-spacing: 0.5px;
         }
 
-        /* Đẩy các nút bên phải sang phía cuối thanh điều khiển */
         .control-spacer {
             flex: 1;
         }
 
-        /* =========================================================
-           18. KHUNG DANH SÁCH KÊNH
-           ========================================================= */
-        /* CHANNEL PANEL */
         .panel {
             width: 100%;
             order: 2;
@@ -497,83 +389,81 @@
             box-shadow: 0 8px 25px rgba(0,0,0,.35);
         }
 
-        /* Phần đầu panel: tiêu đề + bộ lọc nhóm */
         .panel-header {
             padding: 13px 15px;
             background: linear-gradient(135deg, #263b20, #11180e);
             border-bottom: 1px solid var(--military-border);
         }
 
-        /* Hàng chứa "DANH SÁCH KÊNH", bộ lọc và số lượng */
         .panel-title {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            gap: 10px;
         }
 
         .panel-title h2 {
+            flex-shrink: 0;
+            white-space: nowrap;
             font-size: 15px;
         }
 
-         .channel-count {
+        .playlist-switch-btn {
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--military-border);
+            border-radius: 6px;
+            background: #182314;
+            color: var(--text-main);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .playlist-switch-btn:hover {
+            border-color: var(--military-light);
+            background: #22301b;
+        }
+
+        .channel-group-filter {
+            width: min(360px, 58vw);
+            min-width: 220px;
+            max-width: 100%;
+            height: 34px;
+            padding: 0 10px;
+            border: 1px solid var(--military-border);
+            border-radius: 6px;
+            background: #182314;
+            color: var(--text-main);
+            font-family: sans-serif, Arial, Helvetica;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+            flex: 1 1 auto;
+        }
+
+        .channel-group-filter:hover,
+        .channel-group-filter:focus {
+            border-color: var(--military-light);
+        }
+
+        .channel-group-filter option {
+            background: #182314;
+            color: var(--text-main);
+        }
+
+        .channel-count {
             color: var(--text-muted);
             font-size: 20px;
+            margin-left: auto;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
-        /* Ô chọn nhóm kênh */
-        /* Ô chọn playlist */
-        .playlist-filter {
-            width: 150px;
-            min-width: 140px;
-            max-width: 180px;
-            padding: 7px 30px 7px 10px;
-            border: 1px solid var(--military-border);
-            border-radius: 6px;
-            background: #182314;
-            color: var(--text-main);
-            font-size: 12px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .playlist-filter:hover,
-        .playlist-filter:focus {
-            border-color: var(--military-light);
-        }
-
-        .playlist-filter option {
-            background: #182314;
-            color: var(--text-main);
-        }
-
-        .channel-filter {
-            min-width: 180px;
-            max-width: 260px;
-            padding: 7px 32px 7px 10px;
-            border: 1px solid var(--military-border);
-            border-radius: 6px;
-            background: #182314;
-            color: var(--text-main);
-            font-size: 12px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .channel-filter:hover,
-        .channel-filter:focus {
-            border-color: var(--military-light);
-        }
-
-        .channel-filter option {
-            background: #182314;
-            color: var(--text-main);
-        }
-
-        /* =========================================================
-           19. LƯỚI KÊNH
-           - auto-fill tự quyết định số cột theo chiều rộng màn hình.
-           - Không ép cố định 5 kênh/hàng.
-           ========================================================= */
         .channel-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -581,7 +471,6 @@
             padding: 16px;
         }
 
-        /* Một ô kênh trong danh sách */
         .channel {
             display: flex;
             flex-direction: column;
@@ -601,17 +490,12 @@
             transform: translateY(-2px);
         }
 
-        /* Kênh đang phát: nền đỏ + viền đỏ */
         .channel.active {
             background: linear-gradient(135deg, #7f1d1d, #450a0a) !important;
             border: 2px solid #ef4444 !important;
             box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
         }
 
-        /* =========================================================
-           20. NỀN + KÍCH THƯỚC LOGO TRONG DANH SÁCH
-           - Kích thước lấy từ --logo-size ở :root.
-           ========================================================= */
         .channel-logo {
             width: var(--logo-size);
             height: var(--logo-size);
@@ -628,7 +512,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,.4);
         }
 
-        /* Ảnh logo thực tế bên trong khung logo */
         .channel-logo img {
             width: 100%;
             height: 100%;
@@ -637,7 +520,6 @@
             display: block;
         }
 
-        /* Logo dự phòng khi kênh không có logo hoặc logo lỗi */
         .logo-fallback {
             width: 100%;
             height: 100%;
@@ -647,17 +529,12 @@
             font-size: 50px;
         }
 
-        /* Khung chứa tên kênh dưới logo */
         .channel-info {
             width: 100%;
             min-width: 0;
             text-align: center;
         }
 
-        /* =========================================================
-           21. TÊN KÊNH TRONG DANH SÁCH
-           - Kích thước lấy từ --channel-name-size.
-           ========================================================= */
         .channel-name {
             font-size: var(--channel-name-size);
             font-weight: 700;
@@ -674,10 +551,6 @@
             grid-column: 1 / -1;
         }
 
-        /* =========================================================
-           22. GIAO DIỆN ĐIỆN THOẠI
-           - Khi màn hình <= 600px sẽ dùng các kích thước này.
-           ========================================================= */
         @media (max-width: 600px) {
             .container { padding: 9px; }
             .channel-list {
@@ -696,40 +569,10 @@
             .active-channel-name { max-width: 150px; font-size: 12px; padding: 4px 8px; }
             .control-row { gap: 6px; }
         }
-        /* =========================================================
-           23. HEADER DANH SÁCH KÊNH NẰM NGANG
-           - Giữ tiêu đề + bộ lọc + số lượng trên cùng một hàng.
-           ========================================================= */
-        /* FORCE HORIZONTAL CHANNEL HEADER */
-        .panel-title {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            flex-wrap: nowrap;
-            gap: 10px;
-        }
-
-        .panel-title h2 {
-            flex-shrink: 0;
-            white-space: nowrap;
-        }
-
-        .channel-filter {
-            flex: 0 1 220px;
-            width: 220px;
-            min-width: 160px;
-            max-width: 220px;
-        }
-
-        .panel-title .channel-count {
-            margin-left: auto;
-            flex-shrink: 0;
-            white-space: nowrap;
-        }
 
         @media (max-width: 520px) {
             .panel-title {
-                flex-wrap: nowrap;
+                flex-wrap: wrap;
                 gap: 6px;
             }
 
@@ -737,38 +580,28 @@
                 font-size: 13px;
             }
 
-            .playlist-filter {
-                width: 120px;
-                min-width: 110px;
-                max-width: 150px;
+            .channel-group-filter {
+                width: min(100%, 100%);
+                min-width: 0;
+                max-width: 100%;
                 font-size: 11px;
+                flex: 1 1 100%;
             }
 
-            .channel-filter {
-                flex: 1 1 auto;
-                width: auto;
-                min-width: 120px;
-                max-width: none;
-                font-size: 11px;
-            }
-
-            .panel-title .channel-count {
+            .channel-count {
                 font-size: 9px;
             }
         }
-
     </style>
 </head>
 
 <body>
-
     <main class="container">
         <div class="layout">
             <section class="player-wrapper">
                 <div id="player" class="player">
                     <video id="video" playsinline preload="metadata"></video>
 
-                    <!-- TÊN WEBSITE GÓC PHẢI TRÊN PLAYER -->
                     <div id="playerTitle" class="player-title">
                          ThánhThơ©2026
                     </div>
@@ -791,32 +624,19 @@
                         </div>
 
                         <div class="control-row">
-                            <!-- 1. LOGO KÊNH NẰM Ở ĐẦU TIÊN -->
                             <img id="activeChannelLogo" class="standalone-logo" src="" alt="Logo">
-                           
-                            <!-- 2. CÁC NÚT ĐIỀU HƯỚNG -->
                             <button id="previousBtn" class="control-btn" type="button" title="Kênh trước">⏮</button>
                             <button id="playBtn" class="control-btn play-btn" type="button" title="Phát / Tạm dừng">▶</button>
                             <button id="nextBtn" class="control-btn" type="button" title="Kênh tiếp theo">⏭</button>
-                            <!-- 3 NÚT TUA LÙI 10 GIÂY -->
                             <button id="rewind10Btn" class="control-btn" type="button" title="Lùi 10 giây">⟲</button>
-
-                            <!-- 4 NÚT TUA TỚI 10 GIÂY -->
                             <button id="forward10Btn" class="control-btn" type="button" title="Tới 10 giây">⟳</button>
-
                             <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>
-
-                            <!-- 5. KHU VỰC CHỮ LIVE VỚI CHẤM ĐỎ -->
                             <div class="time-badge">
                                 <span class="live-dot"></span>
                                 <span class="live-text">LIVE</span>
                             </div>
-                            <!-- 6. TÊN KÊNH CĂN GIỮA & RỘNG HƠN -->
                             <div id="activeChannelName" class="active-channel-name" title=""></div>
-
                             <div class="control-spacer"></div>
-
-                            <!-- 7. NÚT TOÀN MÀN HÌNH -->
                             <button id="fullscreenBtn" class="control-btn" type="button" title="Toàn màn hình">⛶</button>
                         </div>
                     </div>
@@ -826,17 +646,12 @@
             <aside class="panel">
                 <div class="panel-header">
                     <div class="panel-title">
-                        <h2>📺 DANH SÁCH KÊNH</h2>
-
-                        <select id="playlistSelect" class="playlist-filter" title="Chọn danh sách">
-                            <option value="tv">KÊNH TIVI</option>
-                            <option value="cinemax">CINEMAX</option>
+                        <button id="playlistSwitchBtn" class="playlist-switch-btn" type="button" title="Chuyển playlist">📺</button>
+                        <select id="channelGroupFilter" class="channel-group-filter" title="Chọn nhóm kênh">
+                            <option value="__ALL__">Tất cả các kênh</option>
                         </select>
 
-                        <select id="channelGroupFilter" class="channel-filter" title="Chọn nhóm kênh">
-                            <option value="__ALL__">Tất cả</option>
-                        </select>
-                        <span id="channelCount" class="channel-count">0 kênh</span>
+                        <span id="channelCount" class="channel-count">0 KÊNH</span>
                     </div>
                 </div>
 
@@ -848,9 +663,6 @@
     </main>
 
     <script>
-        // =========================================================
-        // CÁC PLAYLIST
-        // =========================================================
         const PLAYLISTS = [
             {
                 id: "tv",
@@ -866,7 +678,6 @@
 
         let currentPlaylistId = "tv";
         let M3U_URL = PLAYLISTS[0].url;
-
         let channels = [];
         let currentChannelIndex = -1;
         let hls = null;
@@ -878,7 +689,7 @@
         const unmuteBanner = document.getElementById("unmuteBanner");
         const channelList = document.getElementById("channelList");
         const channelCount = document.getElementById("channelCount");
-        const playlistSelect = document.getElementById("playlistSelect");
+        const playlistSwitchBtn = document.getElementById("playlistSwitchBtn");
         const channelGroupFilter = document.getElementById("channelGroupFilter");
         let selectedChannelGroup = "__ALL__";
         const playBtn = document.getElementById("playBtn");
@@ -890,85 +701,39 @@
         const progress = document.getElementById("progress");
         const currentTimeEl = document.getElementById("currentTime");
         const durationTimeEl = document.getElementById("durationTime");
+        const fullscreenBtn = document.getElementById("fullscreenBtn");
+        const activeChannelLogo = document.getElementById("activeChannelLogo");
+        const activeChannelName = document.getElementById("activeChannelName");
 
-        // =========================================================
-        // THANH THỜI GIAN IPTV
-        // - Live stream có duration hữu hạn: thanh chạy theo video và kéo để tua.
-        // - Live-only / duration vô hạn: giữ ở trạng thái LIVE, không cho kéo.
-        // =========================================================
         let progressSeekable = false;
 
         function formatTime(seconds) {
             if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
-
-            const totalSeconds = Math.floor(seconds);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const secs = totalSeconds % 60;
-
-            if (hours > 0) {
-                return String(hours).padStart(2, "0") + ":" +
-                       String(minutes).padStart(2, "0") + ":" +
-                       String(secs).padStart(2, "0");
-            }
-
-            return String(minutes).padStart(2, "0") + ":" +
-                   String(secs).padStart(2, "0");
-        }
-
-        function updateTimeLabels() {
-            currentTimeEl.textContent = formatTime(video.currentTime);
-
-            if (Number.isFinite(video.duration) && video.duration > 0) {
-                durationTimeEl.textContent = formatTime(video.duration);
-            } else {
-                durationTimeEl.textContent = "LIVE";
-            }
+            const total = Math.floor(seconds);
+            const h = Math.floor(total / 3600);
+            const m = Math.floor((total % 3600) / 60);
+            const s = total % 60;
+            if (h > 0) return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+            return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
         }
 
         function getSeekableRange() {
             try {
                 if (!video.seekable || video.seekable.length === 0) return null;
-
                 const start = video.seekable.start(0);
                 const end = video.seekable.end(video.seekable.length - 1);
-
-                if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
-                    return null;
-                }
-
+                if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
                 return { start, end };
             } catch (_) {
                 return null;
             }
         }
 
-        function formatTime(seconds) {
-            if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
-
-            const total = Math.floor(seconds);
-            const h = Math.floor(total / 3600);
-            const m = Math.floor((total % 3600) / 60);
-            const s = total % 60;
-
-            if (h > 0) {
-                return String(h).padStart(2, "0") + ":" +
-                       String(m).padStart(2, "0") + ":" +
-                       String(s).padStart(2, "0");
-            }
-
-            return String(m).padStart(2, "0") + ":" +
-                   String(s).padStart(2, "0");
-        }
-
         function updateTimeLabels() {
             const range = getSeekableRange();
-
             if (range) {
-                currentTimeEl.textContent =
-                    formatTime(Math.max(0, video.currentTime - range.start));
-                durationTimeEl.textContent =
-                    formatTime(range.end - range.start);
+                currentTimeEl.textContent = formatTime(Math.max(0, video.currentTime - range.start));
+                durationTimeEl.textContent = formatTime(range.end - range.start);
             } else {
                 currentTimeEl.textContent = formatTime(video.currentTime);
                 durationTimeEl.textContent = "LIVE";
@@ -978,13 +743,11 @@
         function setProgressVisual(percent) {
             const value = Math.max(0, Math.min(100, Number(percent) || 0));
             progress.value = value;
-            progress.style.background =
-                `linear-gradient(to right, #ef4444 0%, #ef4444 ${value}%, #30382b ${value}%, #30382b 100%)`;
+            progress.style.background = `linear-gradient(to right, #ef4444 0%, #ef4444 ${value}%, #30382b ${value}%, #30382b 100%)`;
         }
 
         function updateProgressState() {
             const range = getSeekableRange();
-
             if (!range) {
                 progressSeekable = false;
                 progress.classList.add("live-only");
@@ -992,43 +755,16 @@
                 updateTimeLabels();
                 return;
             }
-
             progressSeekable = true;
             progress.classList.remove("live-only");
-
             const windowDuration = range.end - range.start;
-            const position = Math.max(
-                0,
-                Math.min(windowDuration, video.currentTime - range.start)
-            );
-
-            const percent = windowDuration > 0
-                ? (position / windowDuration) * 100
-                : 100;
-
+            const position = Math.max(0, Math.min(windowDuration, video.currentTime - range.start));
+            const percent = windowDuration > 0 ? (position / windowDuration) * 100 : 100;
             setProgressVisual(percent);
             updateTimeLabels();
         }
 
-        function seekFromProgress() {
-            const range = getSeekableRange();
-            if (!progressSeekable || !range) return;
-
-            const percent = Math.max(0, Math.min(100, Number(progress.value))) / 100;
-            const target = range.start + percent * (range.end - range.start);
-
-            if (Number.isFinite(target)) {
-                video.currentTime = target;
-                updateTimeLabels();
-            }
-        }
-
-        const fullscreenBtn = document.getElementById("fullscreenBtn");
-        const activeChannelLogo = document.getElementById("activeChannelLogo");
-        const activeChannelName = document.getElementById("activeChannelName");
-
         window.addEventListener("DOMContentLoaded", () => {
-            playlistSelect.value = currentPlaylistId;
             setupEventListeners();
             loadPlaylist();
         });
@@ -1039,23 +775,14 @@
 
             currentPlaylistId = playlist.id;
             M3U_URL = playlist.url;
-
-            // Reset nhóm kênh khi chuyển sang playlist khác.
             selectedChannelGroup = "__ALL__";
-
-            if (playlistSelect) {
-                playlistSelect.value = playlist.id;
-            }
-
             if (channelGroupFilter) {
                 channelGroupFilter.value = "__ALL__";
             }
 
-            // Xóa danh sách cũ trong lúc tải list mới.
-            channelList.innerHTML =
-                '<div class="loading">⏳ Đang tải danh sách...</div>';
-            channelCount.textContent = "0 kênh";
-
+            channelList.innerHTML = '<div class="loading">⏳ Đang tải danh sách...</div>';
+            channelCount.textContent = "0 KÊNH";
+            updatePlaylistButton();
             await loadPlaylist();
         }
 
@@ -1069,26 +796,17 @@
 
                 if (channels.length === 0) throw new Error("Playlist không có kênh");
 
-                buildChannelGroups();
+                updateChannelGroupFilter();
                 renderChannels();
 
-                // KÊNH MẶC ĐỊNH
-                // KÊNH TIVI: ưu tiên ANTV như trước.
-                // CINEMAX: phát mục đầu tiên của playlist.
                 let defaultIndex = 0;
-
                 if (currentPlaylistId === "tv") {
-                    defaultIndex = channels.findIndex(ch =>
-                        ch.name.toUpperCase().includes("ANTV")
-                    );
-
-                    if (defaultIndex === -1) {
-                        defaultIndex = 0;
-                    }
+                    defaultIndex = channels.findIndex(ch => ch.name.toUpperCase().includes("ANTV"));
+                    if (defaultIndex === -1) defaultIndex = 0;
                 }
 
                 playChannelByIndex(defaultIndex, false, true);
-
+                updatePlaylistButton();
             } catch (error) {
                 console.error("PLAYLIST ERROR:", error);
                 channelList.innerHTML = `<div class="empty">❌ Không tải được playlist.</div>`;
@@ -1111,7 +829,7 @@
                     if (tvgName) name = tvgName;
 
                     info = {
-                        name: name,
+                        name,
                         logo: getAttribute(line, "tvg-logo"),
                         id: getAttribute(line, "tvg-id"),
                         group: getAttribute(line, "group-title") || getAttribute(line, "tvg-group") || "Khác"
@@ -1136,19 +854,21 @@
             return match ? (match[1] || match[2] || match[3] || "").trim() : "";
         }
 
-        function buildChannelGroups() {
+        function updateChannelGroupFilter() {
+            if (!channelGroupFilter) return;
+
             const groups = [...new Set(
                 channels
                     .map(channel => (channel.group || "Khác").trim())
                     .filter(Boolean)
-            )];
+            )].sort((a, b) => a.localeCompare(b, "vi"));
 
-            groups.sort((a, b) =>
-                a.localeCompare(b, "vi", { sensitivity: "base" })
-            );
+            channelGroupFilter.innerHTML = "";
 
-            channelGroupFilter.innerHTML =
-                '<option value="__ALL__">Tất cả</option>';
+            const allOption = document.createElement("option");
+            allOption.value = "__ALL__";
+            allOption.textContent = "Tất cả các kênh";
+            channelGroupFilter.appendChild(allOption);
 
             groups.forEach(group => {
                 const option = document.createElement("option");
@@ -1157,7 +877,12 @@
                 channelGroupFilter.appendChild(option);
             });
 
-            channelGroupFilter.value = selectedChannelGroup;
+            if (groups.includes(selectedChannelGroup)) {
+                channelGroupFilter.value = selectedChannelGroup;
+            } else {
+                selectedChannelGroup = "__ALL__";
+                channelGroupFilter.value = "__ALL__";
+            }
         }
 
         function getFilteredChannels() {
@@ -1174,13 +899,10 @@
             channelList.innerHTML = "";
 
             const filteredChannels = getFilteredChannels();
-
-            channelCount.textContent =
-                filteredChannels.length + " kênh";
+            channelCount.textContent = filteredChannels.length + " KÊNH";
 
             if (filteredChannels.length === 0) {
-                channelList.innerHTML =
-                    '<div class="empty">Không có kênh trong nhóm này.</div>';
+                channelList.innerHTML = '<div class="empty">Không có kênh trong nhóm này.</div>';
                 return;
             }
 
@@ -1188,9 +910,7 @@
                 const index = channels.indexOf(channel);
 
                 const item = document.createElement("div");
-                item.className =
-                    "channel" +
-                    (index === currentChannelIndex ? " active" : "");
+                item.className = "channel" + (index === currentChannelIndex ? " active" : "");
 
                 const logoContainer = document.createElement("div");
                 logoContainer.className = "channel-logo";
@@ -1204,12 +924,10 @@
                     img.src = channel.logo;
                     img.alt = channel.name;
                     img.loading = "lazy";
-
                     img.onerror = function () {
                         this.style.display = "none";
                         fallback.style.display = "flex";
                     };
-
                     logoContainer.appendChild(img);
                     fallback.style.display = "none";
                 }
@@ -1235,27 +953,9 @@
             });
         }
 
-        channelGroupFilter.addEventListener("change", () => {
-            selectedChannelGroup = channelGroupFilter.value;
-            renderChannels();
-
-            // Khi chọn nhóm kênh, đưa ĐẦU KHUNG DANH SÁCH KÊNH
-            // lên đúng đầu vùng nhìn, để vẫn thấy tiêu đề + ô chọn nhóm.
-            requestAnimationFrame(() => {
-                const panel = document.querySelector(".panel");
-
-                if (panel) {
-                    const panelTop =
-                        panel.getBoundingClientRect().top +
-                        window.pageYOffset;
-
-                    window.scrollTo({
-                        top: Math.max(0, panelTop - 8),
-                        left: 0,
-                        behavior: "smooth"
-                    });
-                }
-            });
+        playlistSwitchBtn.addEventListener("click", async () => {
+            const nextPlaylistId = currentPlaylistId === "tv" ? "cinemax" : "tv";
+            await switchPlaylist(nextPlaylistId);
         });
 
         function playChannelByIndex(index, scrollToTop = true, isInitialAutoplay = false) {
@@ -1264,7 +964,6 @@
             currentChannelIndex = index;
             const channel = channels[index];
 
-            // CẬP NHẬT LOGO VÀ TÊN KÊNH RIÊNG BIỆT
             if (channel.logo) {
                 activeChannelLogo.src = channel.logo;
                 activeChannelLogo.style.display = "inline-block";
@@ -1274,17 +973,12 @@
             }
 
             activeChannelName.textContent = channel.name;
-            activeChannelName.title = channel.name; // Di chuột vào sẽ thấy đầy đủ tên
+            activeChannelName.title = channel.name;
             activeChannelName.style.display = "flex";
 
-            const items = document.querySelectorAll(".channel");
-            items.forEach((item, i) => {
-                item.classList.toggle("active", i === index);
-            });
+            renderChannels();
 
-            if (scrollToTop) {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
+            if (scrollToTop) window.scrollTo({ top: 0, behavior: "smooth" });
 
             if (hls) {
                 hls.destroy();
@@ -1292,7 +986,6 @@
             }
 
             video.pause();
-
             progressSeekable = false;
             progress.classList.add("live-only");
             progress.value = 100;
@@ -1309,16 +1002,13 @@
             playerOverlay.classList.remove("hidden");
             playerOverlay.textContent = `Loading Kênh ..... ${channel.name}...`;
 
-            // Mỗi lần chuyển kênh, hiện lại tên website + thanh điều khiển.
             showVideoControls();
 
             const url = channel.url;
 
             if (video.canPlayType("application/vnd.apple.mpegurl")) {
                 video.src = url;
-                video.play()
-                    .then(() => handlePlaySuccess())
-                    .catch((err) => handlePlayError(err));
+                video.play().then(handlePlaySuccess).catch(handlePlayError);
             } else if (window.Hls && Hls.isSupported()) {
                 hls = new Hls({
                     enableWorker: true,
@@ -1330,21 +1020,15 @@
                 hls.attachMedia(video);
 
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    video.play()
-                        .then(() => handlePlaySuccess())
-                        .catch((err) => handlePlayError(err));
+                    video.play().then(handlePlaySuccess).catch(handlePlayError);
                 });
 
                 hls.on(Hls.Events.ERROR, (event, data) => {
-                    if (data.fatal) {
-                        handlePlayError(data);
-                    }
+                    if (data.fatal) handlePlayError(data);
                 });
             } else {
                 video.src = url;
-                video.play()
-                    .then(() => handlePlaySuccess())
-                    .catch((err) => handlePlayError(err));
+                video.play().then(handlePlaySuccess).catch(handlePlayError);
             }
         }
 
@@ -1365,12 +1049,16 @@
             playBtn.textContent = video.paused ? "▶" : "⏸";
         }
 
+        function updatePlaylistButton() {
+            playlistSwitchBtn.textContent = currentPlaylistId === "tv" ? "📺" : "🎬";
+            playlistSwitchBtn.title = currentPlaylistId === "tv" ? "Đang là KÊNH TIVI - bấm để qua CINEMAX" : "Đang là CINEMAX - bấm để qua KÊNH TIVI";
+        }
+
         function toggleFullscreen() {
             const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
 
             if (!isFullscreen) {
-                const elem = player; 
-
+                const elem = player;
                 if (elem.requestFullscreen) {
                     elem.requestFullscreen().catch(() => {
                         if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
@@ -1397,46 +1085,34 @@
             }
         }
 
-        // =========================================================
-        // TỰ ẨN / HIỆN THANH ĐIỀU KHIỂN PLAYER + TÊN WEBSITE
-        // Các hàm này phải nằm ngoài setupEventListeners() để
-        // playChannelByIndex() và các hàm khác cũng gọi được.
-        // =========================================================
         let controlsHideTimer = null;
         const videoControls = document.querySelector(".video-controls");
 
         function showVideoControls() {
             if (!videoControls) return;
-
             clearTimeout(controlsHideTimer);
             player.classList.add("controls-active");
             videoControls.classList.remove("controls-hidden");
-
-            if (playerTitle) {
-                playerTitle.classList.remove("title-hidden");
-            }
+            if (playerTitle) playerTitle.classList.remove("title-hidden");
         }
 
         function hideVideoControls(delay = 1000) {
             if (!videoControls) return;
-
             clearTimeout(controlsHideTimer);
-
             controlsHideTimer = setTimeout(() => {
                 if (!video.paused && !videoControls.matches(":hover")) {
                     videoControls.classList.add("controls-hidden");
                     player.classList.remove("controls-active");
-
-                    if (playerTitle) {
-                        playerTitle.classList.add("title-hidden");
-                    }
+                    if (playerTitle) playerTitle.classList.add("title-hidden");
                 }
             }, delay);
         }
 
         function setupEventListeners() {
-            playlistSelect.addEventListener("change", async () => {
-                await switchPlaylist(playlistSelect.value);
+            channelGroupFilter.addEventListener("change", () => {
+                selectedChannelGroup = channelGroupFilter.value || "__ALL__";
+                renderChannels();
+                scrollToActiveChannelInList();
             });
 
             if (videoControls) {
@@ -1454,8 +1130,6 @@
                     if (!video.paused) hideVideoControls(700);
                 });
 
-                // FULLSCREEN: một số trình duyệt không kích hoạt mouseenter/mouseleave
-                // của player ổn định, nên nghe mousemove trực tiếp trên document.
                 document.addEventListener("mousemove", (e) => {
                     const isFullscreen = !!(
                         document.fullscreenElement ||
@@ -1466,7 +1140,6 @@
 
                     if (!isFullscreen) return;
 
-                    // Chỉ xử lý khi con trỏ đang nằm trong vùng player fullscreen.
                     const rect = player.getBoundingClientRect();
                     const insidePlayer =
                         e.clientX >= rect.left &&
@@ -1476,31 +1149,18 @@
 
                     if (insidePlayer) {
                         showVideoControls();
-
-                        // Khi đang rê chuột bình thường, thanh hiện.
-                        // Dừng chuột khoảng 1.5 giây thì tự ẩn.
                         if (!video.paused) hideVideoControls(1500);
                     }
                 });
 
-                document.addEventListener("fullscreenchange", () => {
-                    if (document.fullscreenElement === player) {
-                        showVideoControls();
-                    } else {
-                        showVideoControls();
-                    }
-                });
-
-                document.addEventListener("webkitfullscreenchange", () => {
-                    showVideoControls();
-                });
+                document.addEventListener("fullscreenchange", showVideoControls);
+                document.addEventListener("webkitfullscreenchange", showVideoControls);
             }
 
             video.addEventListener("play", () => hideVideoControls(1800));
             video.addEventListener("pause", showVideoControls);
             video.addEventListener("ended", showVideoControls);
 
-            // Cập nhật thanh thời gian theo vị trí phát thực tế.
             video.addEventListener("timeupdate", updateProgressState);
             video.addEventListener("durationchange", updateProgressState);
             video.addEventListener("loadedmetadata", updateProgressState);
@@ -1508,11 +1168,6 @@
             video.addEventListener("canplay", updateProgressState);
             video.addEventListener("progress", updateProgressState);
 
-            // Kéo thanh để tua nếu stream có duration hữu hạn.
-            // Kéo cục tròn để tua ngay trong lúc đang kéo.
-            // Khi đang kéo: CHỈ di chuyển cục kéo và cập nhật thời gian xem trước.
-            // Không đổi video.currentTime liên tục vì HLS có thể bị treo nếu
-            // nhận quá nhiều lệnh seek trong cùng một lần kéo.
             progress.addEventListener("input", () => {
                 const range = getSeekableRange();
                 if (!progressSeekable || !range) return;
@@ -1520,13 +1175,10 @@
                 const percent = Math.max(0, Math.min(100, Number(progress.value))) / 100;
                 setProgressVisual(percent * 100);
 
-                const previewTime =
-                    percent * (range.end - range.start);
-
+                const previewTime = percent * (range.end - range.start);
                 currentTimeEl.textContent = formatTime(previewTime);
             });
 
-            // Chỉ seek 1 lần khi người dùng THẢ cục kéo.
             let seekInProgress = false;
             let seekUnlockTimer = null;
 
@@ -1536,19 +1188,13 @@
                 const range = getSeekableRange();
                 if (!progressSeekable || !range) return;
 
-                const percent =
-                    Math.max(0, Math.min(100, Number(progress.value))) / 100;
-
-                const target =
-                    range.start + percent * (range.end - range.start);
-
+                const percent = Math.max(0, Math.min(100, Number(progress.value))) / 100;
+                const target = range.start + percent * (range.end - range.start);
                 if (!Number.isFinite(target)) return;
 
                 seekInProgress = true;
                 video.currentTime = target;
-
-                currentTimeEl.textContent =
-                    formatTime(target - range.start);
+                currentTimeEl.textContent = formatTime(target - range.start);
 
                 clearTimeout(seekUnlockTimer);
                 seekUnlockTimer = setTimeout(() => {
@@ -1562,7 +1208,6 @@
                 updateProgressState();
             });
 
-            // Khi thả chuột/ngón tay, thực hiện đúng 1 lần tua.
             progress.addEventListener("change", performStableSeek);
 
             unmuteBanner.addEventListener("click", () => {
@@ -1571,9 +1216,7 @@
             });
 
             video.addEventListener("volumechange", () => {
-                if (!video.muted) {
-                    unmuteBanner.classList.add("hidden");
-                }
+                if (!video.muted) unmuteBanner.classList.add("hidden");
             });
 
             playBtn.addEventListener("click", () => {
@@ -1599,49 +1242,19 @@
                 playChannelByIndex(nextIndex, true, false);
             });
 
-            // =========================================================
-            // TUA 10 GIÂY TRƯỚC / SAU
-            // =========================================================
             function seekBySeconds(seconds) {
                 const range = getSeekableRange();
-
-                // Stream live-only không có vùng tua.
                 if (!range) return;
-
                 let target = video.currentTime + seconds;
-
-                // Giới hạn trong vùng mà stream cho phép tua.
                 target = Math.max(range.start, Math.min(range.end, target));
-
-                if (Number.isFinite(target)) {
-                    video.currentTime = target;
-                }
+                if (Number.isFinite(target)) video.currentTime = target;
             }
 
-            // Lùi 10 giây
-            rewind10Btn.addEventListener("click", () => {
-                seekBySeconds(-10);
-            });
+            rewind10Btn.addEventListener("click", () => seekBySeconds(-10));
+            forward10Btn.addEventListener("click", () => seekBySeconds(10));
 
-            // Tới 10 giây
-            forward10Btn.addEventListener("click", () => {
-                seekBySeconds(10);
-            });
-
-            // ĐI TỚI KÊNH ĐANG PHÁT
             currentChannelBtn.addEventListener("click", () => {
-                if (currentChannelIndex < 0) return;
-
-                const activeChannel =
-                    document.querySelectorAll(".channel")[currentChannelIndex];
-
-                if (!activeChannel) return;
-
-                activeChannel.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                    inline: "center"
-                });
+                scrollToActiveChannelInList();
             });
 
             fullscreenBtn.addEventListener("click", (e) => {
@@ -1652,7 +1265,6 @@
 
             document.addEventListener("keydown", (e) => {
                 if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-
                 switch (e.key) {
                     case " ":
                         e.preventDefault();
@@ -1672,6 +1284,20 @@
                         toggleFullscreen();
                         break;
                 }
+            });
+        }
+
+        function getActiveChannelElement() {
+            return Array.from(document.querySelectorAll(".channel")).find(el => el.classList.contains("active")) || null;
+        }
+
+        function scrollToActiveChannelInList() {
+            const activeChannel = getActiveChannelElement();
+            if (!activeChannel) return;
+            activeChannel.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+                inline: "center"
             });
         }
     </script>
