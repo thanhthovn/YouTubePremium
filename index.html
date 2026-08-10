@@ -484,7 +484,12 @@
             <section class="player-wrapper">
                 <div id="player" class="player">
                     <video id="video" playsinline preload="metadata"></video>
-<div id="playerOverlay" class="player-overlay">
+
+                    <div id="unmuteBanner" class="unmute-banner hidden">
+                        🔊 Nhấp vào đây để bật tiếng
+                    </div>
+
+                    <div id="playerOverlay" class="player-overlay">
                         Đang tải danh sách kênh...
                     </div>
 
@@ -712,8 +717,10 @@
 
             video.pause();
 
-            video.muted = false;
-            video.volume = 1;
+            if (isInitialAutoplay) {
+                video.muted = true;
+                unmuteBanner.classList.remove("hidden");
+            }
 
             playerOverlay.style.color = "#88937d";
             playerOverlay.classList.remove("hidden");
