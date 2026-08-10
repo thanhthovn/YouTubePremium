@@ -242,15 +242,41 @@
            - background: màu nền.
            - margin-bottom ở trên đang được giữ nguyên theo bản gốc.
            ========================================================= */
-        .progress {
+        .progress-time-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             width: 100%;
+        }
+
+        .progress-time {
+            flex: 0 0 auto;
+            min-width: 42px;
+            color: #ffffff;
+            font-size: 11px;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(0,0,0,.8);
+        }
+
+        .progress {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: auto;
             height: 6px;
             appearance: none;
             -webkit-appearance: none;
             cursor: pointer;
-            background: #30382b;
+            background: linear-gradient(to right, #ef4444 0%, #ef4444 0%, #30382b 0%, #30382b 100%);
             border-radius: 10px;
             outline: none;
+        }
+
+        /* Khi stream là live-only, thanh vẫn hiển thị nhưng không cho kéo */
+        .progress.live-only {
+            cursor: default;
+            opacity: .85;
         }
 
         /* Nút tròn dùng để kéo vị trí thời gian trên Chrome/Edge/Opera */
@@ -259,6 +285,15 @@
             -webkit-appearance: none;
             width: 14px;
             height: 14px;
+            border-radius: 50%;
+            background: #ef4444;
+            cursor: pointer;
+        }
+
+        .progress::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border: none;
             border-radius: 50%;
             background: #ef4444;
             cursor: pointer;
@@ -682,7 +717,11 @@
 
                     <div class="video-controls">
                         <div class="progress-row">
-                            <input id="progress" class="progress" type="range" min="0" max="100" value="0" step="0.1">
+                            <div class="progress-time-row">
+                                <span id="currentTime" class="progress-time">00:00</span>
+                                <input id="progress" class="progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="Tiến trình phát">
+                                <span id="durationTime" class="progress-time">00:00</span>
+                            </div>
                         </div>
 
                         <div class="control-row">
@@ -751,6 +790,141 @@
         const nextBtn = document.getElementById("nextBtn");
         const currentChannelBtn = document.getElementById("currentChannelBtn");
         const progress = document.getElementById("progress");
+        const currentTimeEl = document.getElementById("currentTime");
+        const durationTimeEl = document.getElementById("durationTime");
+
+        // =========================================================
+        // THANH THỜI GIAN IPTV
+        // - Live stream có duration hữu hạn: thanh chạy theo video và kéo để tua.
+        // - Live-only / duration vô hạn: giữ ở trạng thái LIVE, không cho kéo.
+        // =========================================================
+        let progressSeekable = false;
+
+        function formatTime(seconds) {
+            if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
+
+            const totalSeconds = Math.floor(seconds);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const secs = totalSeconds % 60;
+
+            if (hours > 0) {
+                return String(hours).padStart(2, "0") + ":" +
+                       String(minutes).padStart(2, "0") + ":" +
+                       String(secs).padStart(2, "0");
+            }
+
+            return String(minutes).padStart(2, "0") + ":" +
+                   String(secs).padStart(2, "0");
+        }
+
+        function updateTimeLabels() {
+            currentTimeEl.textContent = formatTime(video.currentTime);
+
+            if (Number.isFinite(video.duration) && video.duration > 0) {
+                durationTimeEl.textContent = formatTime(video.duration);
+            } else {
+                durationTimeEl.textContent = "LIVE";
+            }
+        }
+
+        function getSeekableRange() {
+            try {
+                if (!video.seekable || video.seekable.length === 0) return null;
+
+                const start = video.seekable.start(0);
+                const end = video.seekable.end(video.seekable.length - 1);
+
+                if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+                    return null;
+                }
+
+                return { start, end };
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function formatTime(seconds) {
+            if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
+
+            const total = Math.floor(seconds);
+            const h = Math.floor(total / 3600);
+            const m = Math.floor((total % 3600) / 60);
+            const s = total % 60;
+
+            if (h > 0) {
+                return String(h).padStart(2, "0") + ":" +
+                       String(m).padStart(2, "0") + ":" +
+                       String(s).padStart(2, "0");
+            }
+
+            return String(m).padStart(2, "0") + ":" +
+                   String(s).padStart(2, "0");
+        }
+
+        function updateTimeLabels() {
+            const range = getSeekableRange();
+
+            if (range) {
+                currentTimeEl.textContent =
+                    formatTime(Math.max(0, video.currentTime - range.start));
+                durationTimeEl.textContent =
+                    formatTime(range.end - range.start);
+            } else {
+                currentTimeEl.textContent = formatTime(video.currentTime);
+                durationTimeEl.textContent = "LIVE";
+            }
+        }
+
+        function setProgressVisual(percent) {
+            const value = Math.max(0, Math.min(100, Number(percent) || 0));
+            progress.value = value;
+            progress.style.background =
+                `linear-gradient(to right, #ef4444 0%, #ef4444 ${value}%, #30382b ${value}%, #30382b 100%)`;
+        }
+
+        function updateProgressState() {
+            const range = getSeekableRange();
+
+            if (!range) {
+                progressSeekable = false;
+                progress.classList.add("live-only");
+                setProgressVisual(100);
+                updateTimeLabels();
+                return;
+            }
+
+            progressSeekable = true;
+            progress.classList.remove("live-only");
+
+            const windowDuration = range.end - range.start;
+            const position = Math.max(
+                0,
+                Math.min(windowDuration, video.currentTime - range.start)
+            );
+
+            const percent = windowDuration > 0
+                ? (position / windowDuration) * 100
+                : 100;
+
+            setProgressVisual(percent);
+            updateTimeLabels();
+        }
+
+        function seekFromProgress() {
+            const range = getSeekableRange();
+            if (!progressSeekable || !range) return;
+
+            const percent = Math.max(0, Math.min(100, Number(progress.value))) / 100;
+            const target = range.start + percent * (range.end - range.start);
+
+            if (Number.isFinite(target)) {
+                video.currentTime = target;
+                updateTimeLabels();
+            }
+        }
+
         const fullscreenBtn = document.getElementById("fullscreenBtn");
         const activeChannelLogo = document.getElementById("activeChannelLogo");
         const activeChannelName = document.getElementById("activeChannelName");
@@ -983,6 +1157,13 @@
 
             video.pause();
 
+            progressSeekable = false;
+            progress.classList.add("live-only");
+            progress.value = 100;
+            setProgressVisual(100);
+            currentTimeEl.textContent = "00:00";
+            durationTimeEl.textContent = "LIVE";
+
             if (isInitialAutoplay) {
                 video.muted = true;
                 unmuteBanner.classList.remove("hidden");
@@ -1168,6 +1349,34 @@
             video.addEventListener("play", () => hideVideoControls(1800));
             video.addEventListener("pause", showVideoControls);
             video.addEventListener("ended", showVideoControls);
+
+            // Cập nhật thanh thời gian theo vị trí phát thực tế.
+            video.addEventListener("timeupdate", updateProgressState);
+            video.addEventListener("durationchange", updateProgressState);
+            video.addEventListener("loadedmetadata", updateProgressState);
+            video.addEventListener("loadeddata", updateProgressState);
+            video.addEventListener("canplay", updateProgressState);
+            video.addEventListener("progress", updateProgressState);
+
+            // Kéo thanh để tua nếu stream có duration hữu hạn.
+            // Kéo cục tròn để tua ngay trong lúc đang kéo.
+            progress.addEventListener("input", () => {
+                const range = getSeekableRange();
+                if (!progressSeekable || !range) return;
+
+                const percent = Math.max(0, Math.min(100, Number(progress.value))) / 100;
+                const target = range.start + percent * (range.end - range.start);
+
+                if (Number.isFinite(target)) {
+                    video.currentTime = target;
+                    setProgressVisual(percent * 100);
+                    currentTimeEl.textContent =
+                        formatTime(target - range.start);
+                }
+            });
+
+            // Khi thả chuột/ngón tay, chốt lại vị trí tua.
+            progress.addEventListener("change", seekFromProgress);
 
             unmuteBanner.addEventListener("click", () => {
                 video.muted = false;
