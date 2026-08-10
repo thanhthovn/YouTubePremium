@@ -9,9 +9,9 @@
 
     <style>
         :root {
-            --logo-size: 150px;
-            --channel-name-size: 26px;
-            --grid-gap: 16px;
+            --logo-size: 250px;
+            --channel-name-size: 30px;
+            --grid-gap: 10px;
             --military-black: #0b1009;
             --military-dark: #11180e;
             --military-green: #263b20;
@@ -36,7 +36,7 @@
         html, body {
             width: 100%;
             min-height: 100%;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: sans-serif, Arial, Helvetica ;
             color: var(--text-main);
             background: var(--military-black);
         }
@@ -197,17 +197,13 @@
             width: 100%;
         }
 
-        /* LOGO KÊNH ĐẶT Ở ĐẦU TIÊN (88px x 88px) */
+        /* LOGO KÊNH ĐẶT Ở ĐẦU TIÊN (100px x 100px) */
         .standalone-logo {
-            width: 88px;
-            height: 88px;
+            width: 100px;
+            height: 100px;
             object-fit: contain;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
             padding: 4px;
             display: none; /* Hiển thị khi có logo */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             flex-shrink: 0;
         }
 
@@ -234,11 +230,7 @@
             border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.15);
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            
-            /* Làm mờ nhẹ ở 2 đầu mép nếu chữ quá dài */
-            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-            mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-        }
+             }
 
         .control-btn {
             width: 40px;
