@@ -428,22 +428,21 @@
             border-color: var(--military-light);
             background: #22301b;
         }
-
         .channel-group-filter {
-            width: min(360px, 58vw);
-            min-width: 220px;
-            max-width: 100%;
+            width: 300px;
+            min-width: 60px;
+            max-width: 300px;
             height: 34px;
-            padding: 0 10px;
+            padding: 0 6px;
             border: 1px solid var(--military-border);
             border-radius: 6px;
             background: #182314;
             color: var(--text-main);
             font-family: sans-serif, Arial, Helvetica;
-            font-size: 12px;
+            font-size: 18px;
             outline: none;
             cursor: pointer;
-            flex: 1 1 auto;
+            flex-shrink: 0;
         }
 
         .channel-group-filter:hover,
@@ -775,6 +774,7 @@
 
             currentPlaylistId = playlist.id;
             M3U_URL = playlist.url;
+            currentChannelIndex = -1;
             selectedChannelGroup = "__ALL__";
             if (channelGroupFilter) {
                 channelGroupFilter.value = "__ALL__";
@@ -1231,15 +1231,40 @@
             video.addEventListener("pause", updatePlayButton);
 
             previousBtn.addEventListener("click", () => {
-                if (channels.length === 0) return;
-                const prevIndex = (currentChannelIndex - 1 + channels.length) % channels.length;
-                playChannelByIndex(prevIndex, true, false);
+                const filteredChannels = getFilteredChannels();
+                if (filteredChannels.length === 0) return;
+
+                const currentPosition = filteredChannels.findIndex(
+                    channel => channel === channels[currentChannelIndex]
+                );
+
+                const prevPosition =
+                    (currentPosition - 1 + filteredChannels.length) %
+                    filteredChannels.length;
+
+                const prevIndex = channels.indexOf(filteredChannels[prevPosition]);
+
+                if (prevIndex !== -1) {
+                    playChannelByIndex(prevIndex, true, false);
+                }
             });
 
             nextBtn.addEventListener("click", () => {
-                if (channels.length === 0) return;
-                const nextIndex = (currentChannelIndex + 1) % channels.length;
-                playChannelByIndex(nextIndex, true, false);
+                const filteredChannels = getFilteredChannels();
+                if (filteredChannels.length === 0) return;
+
+                const currentPosition = filteredChannels.findIndex(
+                    channel => channel === channels[currentChannelIndex]
+                );
+
+                const nextPosition =
+                    (currentPosition + 1) % filteredChannels.length;
+
+                const nextIndex = channels.indexOf(filteredChannels[nextPosition]);
+
+                if (nextIndex !== -1) {
+                    playChannelByIndex(nextIndex, true, false);
+                }
             });
 
             function seekBySeconds(seconds) {
