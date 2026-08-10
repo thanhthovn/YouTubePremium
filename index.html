@@ -8,6 +8,10 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <style>
+        /* =========================================================
+           1. BIẾN GIAO DIỆN DÙNG CHUNG
+           - Chỉnh các thông số ở đây để thay đổi giao diện nhanh.
+           ========================================================= */
         :root {
             --logo-size: 250px;
             --channel-name-size: 30px;
@@ -23,16 +27,26 @@
             --text-muted: #a8b19b;
         }
 
+        /* =========================================================
+           2. RESET CSS
+           - Xóa margin/padding mặc định của trình duyệt.
+           - box-sizing giúp tính kích thước dễ kiểm soát hơn.
+           ========================================================= */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        /* Cuộn trang mượt khi dùng scrollIntoView / scrollTo */
         html {
             scroll-behavior: smooth;
         }
 
+        /* =========================================================
+           3. TOÀN TRANG
+           - Chiều rộng, chiều cao tối thiểu, font, màu chữ và nền.
+           ========================================================= */
         html, body {
             width: 100%;
             min-height: 100%;
@@ -41,6 +55,11 @@
             background: var(--military-black);
         }
 
+        /* =========================================================
+           4. NỀN QUÂN ĐỘI
+           - Lớp nền cố định phía sau toàn bộ website.
+           - Các radial-gradient tạo các vùng sáng tối kiểu quân đội.
+           ========================================================= */
         body::before {
             content: "";
             position: fixed;
@@ -54,6 +73,10 @@
                 linear-gradient(135deg, #0b1009, #1c2817 35%, #11180e 70%, #28381f);
         }
 
+        /* =========================================================
+           5. KHUNG BAO NGOÀI
+           - Giới hạn chiều rộng website và tạo khoảng đệm hai bên.
+           ========================================================= */
         .container {
             width: 100%;
             max-width: 1700px;
@@ -61,12 +84,19 @@
             padding: 18px;
         }
 
+        /* =========================================================
+           6. BỐ CỤC CHÍNH
+           - Trình phát ở trên, danh sách kênh ở dưới.
+           ========================================================= */
         .layout {
             display: flex;
             flex-direction: column;
             gap: 18px;
         }
 
+        /* =========================================================
+           7. PLAYER - KHU VỰC TRÌNH PHÁT
+           ========================================================= */
         /* PLAYER */
         .player-wrapper {
             width: 100%;
@@ -84,6 +114,10 @@
             box-shadow: 0 8px 25px rgba(0,0,0,.5);
         }
 
+        /* =========================================================
+           8. FULLSCREEN
+           - Đảm bảo player chiếm toàn màn hình khi được phép.
+           ========================================================= */
         /* FULLSCREEN COMPATIBILITY */
         .player:fullscreen,
         .player:-webkit-full-screen,
@@ -101,6 +135,10 @@
             align-items: center !important;
         }
 
+        /* =========================================================
+           9. VIDEO
+           - Video lấp đầy khung player nhưng giữ đúng tỷ lệ nội dung.
+           ========================================================= */
         video {
             width: 100%;
             height: 100%;
@@ -109,6 +147,10 @@
             object-fit: contain;
         }
 
+        /* =========================================================
+           10. LỚP THÔNG BÁO TRÊN VIDEO
+           - Dùng khi đang tải hoặc báo lỗi.
+           ========================================================= */
         .player-overlay {
             position: absolute;
             inset: 0;
@@ -129,6 +171,9 @@
             display: none;
         }
 
+        /* =========================================================
+           11. THÔNG BÁO BẬT ÂM THANH
+           ========================================================= */
         /* THÔNG BÁO BẬT ÂM THANH */
         .unmute-banner {
             position: absolute;
@@ -153,6 +198,9 @@
             display: none;
         }
 
+        /* =========================================================
+           12. THANH ĐIỀU KHIỂN VIDEO
+           ========================================================= */
         /* CONTROLS */
         .video-controls {
             position: absolute;
@@ -164,11 +212,19 @@
             background: linear-gradient(to top, rgba(5,8,4,.98), rgba(5,8,4,.88), transparent);
         }
 
+        /* Thanh chứa thanh thời gian */
         .progress-row {
             width: 100%;
             margin-bottom: -95px;
         }
 
+        /* =========================================================
+           13. THANH THỜI GIAN
+           - width: chiều dài.
+           - height: độ dày.
+           - background: màu nền.
+           - margin-bottom ở trên đang được giữ nguyên theo bản gốc.
+           ========================================================= */
         .progress {
             width: 100%;
             height: 6px;
@@ -180,6 +236,7 @@
             outline: none;
         }
 
+        /* Nút tròn dùng để kéo vị trí thời gian trên Chrome/Edge/Opera */
         .progress::-webkit-slider-thumb {
             appearance: none;
             -webkit-appearance: none;
@@ -190,6 +247,7 @@
             cursor: pointer;
         }
 
+        /* Hàng chứa logo, tên kênh và các nút điều khiển */
         .control-row {
             display: flex;
             align-items: center;
@@ -197,6 +255,9 @@
             width: 100%;
         }
 
+        /* =========================================================
+           14. LOGO KÊNH ĐANG PHÁT
+           ========================================================= */
         /* LOGO KÊNH ĐẶT Ở ĐẦU TIÊN (100px x 100px) */
         .standalone-logo {
             width: 100px;
@@ -207,18 +268,23 @@
             flex-shrink: 0;
         }
 
+        /* =========================================================
+           15. TÊN KÊNH ĐANG PHÁT
+           - Đây là tên nằm trên thanh điều khiển.
+           - Không phải tên kênh dưới logo trong danh sách.
+           ========================================================= */
         /* TÊN KÊNH LINH ĐỘNG (ĐÃ MỞ RỘNG & CĂN GIỮA) */
         .active-channel-name {
             font-size: clamp(20px, 10vw, 25px);
             font-weight: bold;
             color: #ffffff;
-            white-space: nowrap;
+            white-space: normal;
             overflow: hidden;
             display: none; /* Hiển thị khi có kênh */
             
             /* Tự co giãn linh hoạt & Đã mở rộng chiều rộng tối đa */
             flex: 0 1 auto;
-            max-width: clamp(180px, 38vw, 550px);
+            max-width: clamp(180px, 50vw, 800px);
             
             /* Căn giữa chữ trong khung */
             text-align: center;
@@ -231,6 +297,10 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
              }
 
+        /* =========================================================
+           16. NÚT ĐIỀU KHIỂN
+           - Dùng chung cho nút trước, play/pause, next, kênh hiện tại...
+           ========================================================= */
         .control-btn {
             width: 40px;
             height: 36px;
@@ -255,6 +325,7 @@
             transform: scale(.94);
         }
 
+        /* Nút Play/Pause - màu đỏ */
         .play-btn {
             width: 44px;
             font-size: 19px;
@@ -267,6 +338,7 @@
             border-color: #e14a4a;
         }
 
+        /* Nút mũi tên đưa về kênh đang phát */
         .current-channel-btn {
             color: #82c341;
             font-size: 20px;
@@ -277,6 +349,9 @@
             color: #a6e063;
         }
 
+        /* =========================================================
+           17. THẺ LIVE
+           ========================================================= */
         /* THẺ LIVE RIÊNG */
         .time-badge {
             display: flex;
@@ -322,10 +397,14 @@
             letter-spacing: 0.5px;
         }
 
+        /* Đẩy các nút bên phải sang phía cuối thanh điều khiển */
         .control-spacer {
             flex: 1;
         }
 
+        /* =========================================================
+           18. KHUNG DANH SÁCH KÊNH
+           ========================================================= */
         /* CHANNEL PANEL */
         .panel {
             width: 100%;
@@ -337,12 +416,14 @@
             box-shadow: 0 8px 25px rgba(0,0,0,.35);
         }
 
+        /* Phần đầu panel: tiêu đề + bộ lọc nhóm */
         .panel-header {
             padding: 13px 15px;
             background: linear-gradient(135deg, #263b20, #11180e);
             border-bottom: 1px solid var(--military-border);
         }
 
+        /* Hàng chứa "DANH SÁCH KÊNH", bộ lọc và số lượng */
         .panel-title {
             display: flex;
             align-items: center;
@@ -358,6 +439,7 @@
             font-size: 10px;
         }
 
+        /* Ô chọn nhóm kênh */
         .channel-filter {
             min-width: 180px;
             max-width: 260px;
@@ -381,6 +463,11 @@
             color: var(--text-main);
         }
 
+        /* =========================================================
+           19. LƯỚI KÊNH
+           - auto-fill tự quyết định số cột theo chiều rộng màn hình.
+           - Không ép cố định 5 kênh/hàng.
+           ========================================================= */
         .channel-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -388,6 +475,7 @@
             padding: 16px;
         }
 
+        /* Một ô kênh trong danh sách */
         .channel {
             display: flex;
             flex-direction: column;
@@ -407,12 +495,17 @@
             transform: translateY(-2px);
         }
 
+        /* Kênh đang phát: nền đỏ + viền đỏ */
         .channel.active {
             background: linear-gradient(135deg, #7f1d1d, #450a0a) !important;
             border: 2px solid #ef4444 !important;
             box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
         }
 
+        /* =========================================================
+           20. NỀN + KÍCH THƯỚC LOGO TRONG DANH SÁCH
+           - Kích thước lấy từ --logo-size ở :root.
+           ========================================================= */
         .channel-logo {
             width: var(--logo-size);
             height: var(--logo-size);
@@ -429,6 +522,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,.4);
         }
 
+        /* Ảnh logo thực tế bên trong khung logo */
         .channel-logo img {
             width: 100%;
             height: 100%;
@@ -437,6 +531,7 @@
             display: block;
         }
 
+        /* Logo dự phòng khi kênh không có logo hoặc logo lỗi */
         .logo-fallback {
             width: 100%;
             height: 100%;
@@ -446,12 +541,17 @@
             font-size: 50px;
         }
 
+        /* Khung chứa tên kênh dưới logo */
         .channel-info {
             width: 100%;
             min-width: 0;
             text-align: center;
         }
 
+        /* =========================================================
+           21. TÊN KÊNH TRONG DANH SÁCH
+           - Kích thước lấy từ --channel-name-size.
+           ========================================================= */
         .channel-name {
             font-size: var(--channel-name-size);
             font-weight: 700;
@@ -468,6 +568,10 @@
             grid-column: 1 / -1;
         }
 
+        /* =========================================================
+           22. GIAO DIỆN ĐIỆN THOẠI
+           - Khi màn hình <= 600px sẽ dùng các kích thước này.
+           ========================================================= */
         @media (max-width: 600px) {
             .container { padding: 9px; }
             .channel-list {
@@ -486,6 +590,10 @@
             .active-channel-name { max-width: 150px; font-size: 12px; padding: 4px 8px; }
             .control-row { gap: 6px; }
         }
+        /* =========================================================
+           23. HEADER DANH SÁCH KÊNH NẰM NGANG
+           - Giữ tiêu đề + bộ lọc + số lượng trên cùng một hàng.
+           ========================================================= */
         /* FORCE HORIZONTAL CHANNEL HEADER */
         .panel-title {
             display: flex;
