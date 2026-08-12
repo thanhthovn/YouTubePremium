@@ -135,6 +135,18 @@
             -webkit-text-stroke: 0.8px gold;
         }
 
+        #programDesc {
+            margin-top: 3px;
+            font-size: 1em;
+            line-height: 1.2;
+            opacity: 0.82;
+            font-weight: bold;
+            max-width: 70vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: right;
+        }
 
 .player-title {
             position: absolute;
@@ -162,10 +174,7 @@
         }
 
         .unmute-banner {
-             position: absolute;
-             top: 14px;
-             left: 16px;
-             z-index: 30;
+             position: static;z-index: 10;
             background: rgba(220, 38, 38, 0.9);
             color: #fff;
             padding: 8px 12px;
@@ -592,13 +601,10 @@
 
                     <div id="playerTitle" class="player-title">
                         <div id="programTitle">ThánhThơ©2026</div>
+                        <div id="programDesc"></div>
                     </div>
 <div id="playerOverlay" class="player-overlay">
                         Đang tải danh sách kênh...
-                    </div>
-
-                    <div id="unmuteBanner" class="unmute-banner hidden">
-                        🔊 BẬT ÂM THANH!
                     </div>
 
                     <div class="video-controls">
@@ -618,6 +624,9 @@
                             <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>                            <div class="time-badge">
                                 <span class="live-dot"></span>
                                 <span class="live-text">LIVE</span>
+                            </div>
+                        <div id="unmuteBanner" class="unmute-banner hidden">
+                                🔊 BẬT ÂM THANH!
                             </div>
                             <div class="control-spacer"></div>
                             <button id="fullscreenBtn" class="control-btn" type="button" title="Toàn màn hình">⛶</button>
@@ -702,6 +711,7 @@
         const playerOverlay = document.getElementById("playerOverlay");
         const playerTitle = document.getElementById("playerTitle");
         const programTitle = document.getElementById("programTitle");
+        const programDesc = document.getElementById("programDesc");
         const unmuteBanner = document.getElementById("unmuteBanner");
         const channelList = document.getElementById("channelList");
         const channelCount = document.getElementById("channelCount");
@@ -915,6 +925,8 @@
                     program.getAttribute("stop")
                 );
                 const title = getXmlText(program, "title");
+                const desc = getXmlText(program, "desc");
+
                 if (
                     !title ||
                     !Number.isFinite(start) ||
@@ -931,7 +943,8 @@
                 data[channelId].push({
                     start,
                     stop,
-                    title
+                    title,
+                    desc
                 });
             });
 
@@ -1038,6 +1051,7 @@
 
             if (!channel) {
                 programTitle.textContent = "ThánhThơ©2026";
+                programDesc.textContent = "";
                 playerTitle.title = "";
                 return;
             }
@@ -1046,9 +1060,13 @@
 
             if (program) {
                 programTitle.textContent = program.title;
-                playerTitle.title = program.title;
+                programDesc.textContent = program.desc || "";
+                playerTitle.title = program.desc
+                    ? `${program.title} - ${program.desc}`
+                    : program.title;
             } else {
                 programTitle.textContent = "ThánhThơ©2026";
+                programDesc.textContent = "";
                 playerTitle.title = "";
             }
         }
