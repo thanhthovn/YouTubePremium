@@ -174,10 +174,7 @@
         }
 
         .unmute-banner {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            z-index: 10;
+             position: static;z-index: 10;
             background: rgba(220, 38, 38, 0.9);
             color: #fff;
             padding: 8px 12px;
@@ -190,6 +187,8 @@
             gap: 6px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             transition: opacity 0.2s;
+       
+             flex-shrink: 0;
         }
 
         .unmute-banner.hidden {
@@ -604,12 +603,7 @@
                         <div id="programTitle">ThánhThơ©2026</div>
                         <div id="programDesc"></div>
                     </div>
-
-                    <div id="unmuteBanner" class="unmute-banner hidden">
-                        🔊 Nhấp vào đây để bật âm thanh!
-                    </div>
-
-                    <div id="playerOverlay" class="player-overlay">
+<div id="playerOverlay" class="player-overlay">
                         Đang tải danh sách kênh...
                     </div>
 
@@ -627,10 +621,12 @@
                             <button id="previousBtn" class="control-btn" type="button" title="Kênh trước">⏮</button>
                             <button id="playBtn" class="control-btn play-btn" type="button" title="Phát / Tạm dừng">▶</button>
                             <button id="nextBtn" class="control-btn" type="button" title="Kênh tiếp theo">⏭</button>
-                            <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>
-                            <div class="time-badge">
+                            <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>                            <div class="time-badge">
                                 <span class="live-dot"></span>
                                 <span class="live-text">LIVE</span>
+                            </div>
+<div id="unmuteBanner" class="unmute-banner hidden">
+                                🔊 BẬT ÂM THANH!
                             </div>
                             <div class="control-spacer"></div>
                             <button id="fullscreenBtn" class="control-btn" type="button" title="Toàn màn hình">⛶</button>
