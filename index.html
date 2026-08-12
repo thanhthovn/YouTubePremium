@@ -275,25 +275,6 @@
             flex-shrink: 0;
         }
 
-        .active-channel-name {
-            font-size: clamp(20px, 10vw, 25px);
-            font-weight: bold;
-            color: #ffffff;
-            white-space: nowrap;
-            overflow: hidden;
-            display: none;
-            flex: 0 1 auto;
-            max-width: clamp(180px, 50vw, 800px);
-            text-align: center;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 6px 14px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
-
         .control-btn {
             width: 40px;
             height: 36px;
@@ -565,9 +546,6 @@
             .channel-name { font-size: 18px; }
             .control-btn { width: 35px; height: 34px; }
             .standalone-logo { width: 50px; height: 50px; }
-            .active-channel-name { max-width: 150px; font-size: 12px; padding: 4px 8px; }
-            .control-row { gap: 6px; }
-        }
 
         @media (max-width: 520px) {
             .panel-title {
@@ -627,14 +605,11 @@
                             <button id="previousBtn" class="control-btn" type="button" title="Kênh trước">⏮</button>
                             <button id="playBtn" class="control-btn play-btn" type="button" title="Phát / Tạm dừng">▶</button>
                             <button id="nextBtn" class="control-btn" type="button" title="Kênh tiếp theo">⏭</button>
-                            <button id="rewind10Btn" class="control-btn" type="button" title="Lùi 10 giây">⟲</button>
-                            <button id="forward10Btn" class="control-btn" type="button" title="Tới 10 giây">⟳</button>
                             <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>
                             <div class="time-badge">
                                 <span class="live-dot"></span>
                                 <span class="live-text">LIVE</span>
                             </div>
-                            <div id="activeChannelName" class="active-channel-name" title=""></div>
                             <div class="control-spacer"></div>
                             <button id="fullscreenBtn" class="control-btn" type="button" title="Toàn màn hình">⛶</button>
                         </div>
@@ -717,14 +692,11 @@
         const previousBtn = document.getElementById("previousBtn");
         const nextBtn = document.getElementById("nextBtn");
         const currentChannelBtn = document.getElementById("currentChannelBtn");
-        const rewind10Btn = document.getElementById("rewind10Btn");
-        const forward10Btn = document.getElementById("forward10Btn");
         const progress = document.getElementById("progress");
         const currentTimeEl = document.getElementById("currentTime");
         const durationTimeEl = document.getElementById("durationTime");
         const fullscreenBtn = document.getElementById("fullscreenBtn");
         const activeChannelLogo = document.getElementById("activeChannelLogo");
-        const activeChannelName = document.getElementById("activeChannelName");
 
         let progressSeekable = false;
 
@@ -1023,10 +995,6 @@
             } else {
                 activeChannelLogo.style.display = "none";
             }
-
-            activeChannelName.textContent = channel.name;
-            activeChannelName.title = channel.name;
-            activeChannelName.style.display = "flex";
 
             // Chỉ đổi trạng thái active, không render lại toàn bộ danh sách.
             document.querySelectorAll(".channel.active").forEach(el => {
@@ -1345,17 +1313,6 @@
                     playChannelByIndex(nextIndex, true, false);
                 }
             });
-
-            function seekBySeconds(seconds) {
-                const range = getSeekableRange();
-                if (!range) return;
-                let target = video.currentTime + seconds;
-                target = Math.max(range.start, Math.min(range.end, target));
-                if (Number.isFinite(target)) video.currentTime = target;
-            }
-
-            rewind10Btn.addEventListener("click", () => seekBySeconds(-10));
-            forward10Btn.addEventListener("click", () => seekBySeconds(10));
 
             currentChannelBtn.addEventListener("click", () => {
                 scrollToActiveChannelInList();
