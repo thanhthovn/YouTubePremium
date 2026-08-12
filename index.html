@@ -174,10 +174,16 @@
         }
 
         .unmute-banner {
-             position: static;z-index: 10;
-            background: rgba(220, 38, 38, 0.9);
+            position: absolute !important;
+            top: 12px !important;
+            left: 12px !important;
+            right: auto !important;
+            bottom: auto !important;
+            z-index: 100 !important;
+            background: rgba(220, 38, 38, 0.94);
             color: #fff;
             padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,.2);
             border-radius: 6px;
             font-size: 13px;
             font-weight: bold;
@@ -185,13 +191,11 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: opacity 0.2s;
-       
-             flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,.35);
+            white-space: nowrap;
         }
 
-        .unmute-banner.hidden {
+.unmute-banner.hidden {
             display: none;
         }
 
@@ -482,6 +486,7 @@
             border-radius: 12px;
             cursor: pointer;
             transition: background .15s ease, transform .15s ease, border-color .15s ease;
+            border: 2px solid transparent;
         }
 
         .channel:hover {
@@ -552,7 +557,15 @@
         }
 
         @media (max-width: 600px) {
-            .container { padding: 9px; }
+            .unmute-banner {
+                top: 8px !important;
+                left: 8px !important;
+                right: auto !important;
+                bottom: auto !important;
+                font-size: 12px;
+                padding: 7px 10px;
+            }
+.container { padding: 9px; }
             .channel-list {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 10px;
@@ -607,7 +620,12 @@
                         Đang tải danh sách kênh...
                     </div>
 
-                    <div class="video-controls">
+
+                    
+                    <div id="unmuteBanner" class="unmute-banner hidden">
+                        🔊 BẬT ÂM THANH!
+                    </div>
+<div class="video-controls">
                         <div class="progress-row">
                             <div class="progress-time-row">
                                 <span id="currentTime" class="progress-time">00:00</span>
@@ -624,9 +642,6 @@
                             <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>                            <div class="time-badge">
                                 <span class="live-dot"></span>
                                 <span class="live-text">LIVE</span>
-                            </div>
-                        <div id="unmuteBanner" class="unmute-banner hidden">
-                                🔊 BẬT ÂM THANH!
                             </div>
                             <div class="control-spacer"></div>
                             <button id="fullscreenBtn" class="control-btn" type="button" title="Toàn màn hình">⛶</button>
@@ -705,6 +720,11 @@
         };
 
         let playRequestId = 0;
+
+        // Chống race condition khi đổi playlist/EPG liên tục.
+        let playlistRequestId = 0;
+        let playlistAbortController = null;
+        let epgAbortController = null;
 
         const player = document.getElementById("player");
         const video = document.getElementById("video");
@@ -799,7 +819,10 @@
 
         window.addEventListener("DOMContentLoaded", () => {
             setupEventListeners();
-            loadPlaylist();
+
+            const initialRequestId = ++playlistRequestId;
+            playlistAbortController = new AbortController();
+            loadPlaylist(initialRequestId, playlistAbortController.signal);
 
             // Chỉ tải/cập nhật EPG khi vào trang web hoặc đổi playlist.
             // Không tự động cập nhật EPG theo thời gian.
@@ -809,16 +832,32 @@
             const playlist = PLAYLISTS.find(item => item.id === playlistId);
             if (!playlist) return;
 
+            // Mỗi lần đổi playlist tạo một phiên request mới.
+            // Chỉ phiên mới nhất được phép cập nhật giao diện/dữ liệu.
+            const requestId = ++playlistRequestId;
+
+            if (playlistAbortController) {
+                try { playlistAbortController.abort(); } catch (_) {}
+            }
+            playlistAbortController = new AbortController();
+
+            if (epgAbortController) {
+                try { epgAbortController.abort(); } catch (_) {}
+            }
+            epgAbortController = null;
+
+            ++playRequestId;
+
             currentPlaylistId = playlist.id;
             M3U_URL = playlist.url;
             currentChannelIndex = -1;
-            ++playRequestId;
 
             epgData = Object.create(null);
             epgUrl = "";
             epgLoaded = false;
             epgLoading = null;
             selectedChannelGroup = "__ALL__";
+
             if (channelGroupFilter) {
                 channelGroupFilter.value = "__ALL__";
             }
@@ -826,9 +865,9 @@
             channelList.innerHTML = '<div class="loading">⏳ Đang tải danh sách...</div>';
             channelCount.textContent = "0 KÊNH";
             updatePlaylistButton();
-            await loadPlaylist();
-        }
 
+            await loadPlaylist(requestId, playlistAbortController.signal);
+        }
 
         function decodeXmlEntities(value = "") {
             const textarea = document.createElement("textarea");
@@ -879,10 +918,10 @@
             return match ? match[1].trim() : "";
         }
 
-        function getPlaylistTvgIds() {
+        function getPlaylistTvgIds(channelSource = channels) {
             const ids = new Set();
 
-            channels.forEach(channel => {
+            channelSource.forEach(channel => {
                 const id = String(channel.id || "").trim();
                 if (!id) return;
 
@@ -960,28 +999,41 @@
             return data;
         }
 
-        async function loadEpg(url) {
+        async function loadEpg(
+            url,
+            requestId,
+            playlistSignal,
+            channelSource = channels
+        ) {
             if (!url) {
                 epgData = Object.create(null);
                 epgLoaded = false;
+                epgUrl = "";
+                epgLoading = null;
                 return;
             }
 
-            if (epgLoaded && epgUrl === url) {
-                return;
-            }
+            if (requestId !== playlistRequestId || playlistSignal?.aborted) return;
 
-            if (epgLoading && epgUrl === url) {
-                return epgLoading;
-            }
+            if (epgLoaded && epgUrl === url) return;
+            if (epgLoading && epgUrl === url) return epgLoading;
 
             epgUrl = url;
-            const allowedIds = getPlaylistTvgIds();
+
+            // Lấy tvg-id từ đúng playlist đang tải.
+            const allowedIds = getPlaylistTvgIds(channelSource);
+
+            if (epgAbortController) {
+                try { epgAbortController.abort(); } catch (_) {}
+            }
+            epgAbortController = new AbortController();
+            const epgSignal = epgAbortController.signal;
 
             epgLoading = (async () => {
                 try {
                     const response = await fetch(url, {
-                        cache: "no-store"
+                        cache: "no-store",
+                        signal: epgSignal
                     });
 
                     if (!response.ok) {
@@ -990,24 +1042,41 @@
 
                     const xmlText = await response.text();
 
-                    epgData = parseEpgXml(
-                        xmlText,
-                        allowedIds
-                    );
+                    // Không commit kết quả nếu request đã cũ.
+                    if (requestId !== playlistRequestId ||
+                        playlistSignal?.aborted ||
+                        epgSignal.aborted) return;
 
+                    const parsed = parseEpgXml(xmlText, allowedIds);
+
+                    if (requestId !== playlistRequestId ||
+                        playlistSignal?.aborted ||
+                        epgSignal.aborted) return;
+
+                    epgData = parsed;
                     epgLoaded = true;
 
                     console.log(
                         "EPG loaded:",
                         Object.keys(epgData).length,
-                        "tvg-id"
+                        "tvg-id",
+                        "| allowed:",
+                        allowedIds.size
                     );
                 } catch (error) {
+                    if (error?.name === "AbortError") return;
+
+                    if (requestId !== playlistRequestId ||
+                        playlistSignal?.aborted ||
+                        epgSignal.aborted) return;
+
                     epgData = Object.create(null);
                     epgLoaded = false;
                     console.warn("EPG ERROR:", error);
                 } finally {
-                    epgLoading = null;
+                    if (requestId === playlistRequestId) {
+                        epgLoading = null;
+                    }
                 }
             })();
 
@@ -1071,37 +1140,68 @@
             }
         }
 
-        async function loadPlaylist() {
+        async function loadPlaylist(requestId = playlistRequestId, signal = null) {
             try {
-                const response = await fetch(M3U_URL, { cache: "no-store" });
+                const response = await fetch(M3U_URL, {
+                    cache: "no-store",
+                    signal
+                });
+
                 if (!response.ok) throw new Error("HTTP " + response.status);
 
                 const text = await response.text();
-                channels = parseM3U(text);
 
-                if (channels.length === 0) {
+                if (requestId !== playlistRequestId || signal?.aborted) return;
+
+                const parsedChannels = parseM3U(text);
+
+                if (parsedChannels.length === 0) {
                     throw new Error("Playlist không có kênh");
                 }
 
-                // Lấy URL EPG từ #EXTM3U url-tvg="..."
-                // Chỉ giữ EPG của các tvg-id có trong M3U.
+                // Chỉ tải EPG cho đúng request hiện tại.
                 const playlistEpgUrl = extractEpgUrl(text);
-                await loadEpg(playlistEpgUrl);
+
+                // QUAN TRỌNG:
+                // Dùng parsedChannels trực tiếp để lấy tvg-id.
+                // Không dùng `channels` ở đây vì playlist mới chưa commit vào
+                // biến toàn cục cho tới sau bước tải EPG.
+                await loadEpg(
+                    playlistEpgUrl,
+                    requestId,
+                    signal,
+                    parsedChannels
+                );
+
+                if (requestId !== playlistRequestId || signal?.aborted) return;
+
+                // Chỉ commit dữ liệu sau khi request vẫn còn hợp lệ.
+                channels = parsedChannels;
 
                 updateChannelGroupFilter();
                 renderChannels();
 
                 let defaultIndex = 0;
                 if (currentPlaylistId === "tv") {
-                    defaultIndex = channels.findIndex(ch => ch.name.toUpperCase().includes("ANTV"));
+                    defaultIndex = channels.findIndex(
+                        ch => ch.name.toUpperCase().includes("ANTV")
+                    );
                     if (defaultIndex === -1) defaultIndex = 0;
                 }
+
+                if (requestId !== playlistRequestId || signal?.aborted) return;
 
                 playChannelByIndex(defaultIndex, false, true);
                 updatePlaylistButton();
             } catch (error) {
+                if (error?.name === "AbortError") return;
+
+                // Request cũ không được phép ghi lỗi đè playlist mới.
+                if (requestId !== playlistRequestId || signal?.aborted) return;
+
                 console.error("PLAYLIST ERROR:", error);
-                channelList.innerHTML = `<div class="empty">❌ Không tải được playlist.</div>`;
+                channelList.innerHTML =
+                    '<div class="empty">❌ Không tải được playlist.</div>';
             }
         }
 
@@ -1311,6 +1411,8 @@
             if (isInitialAutoplay) {
                 video.muted = true;
                 unmuteBanner.classList.remove("hidden");
+            } else if (!video.muted) {
+                unmuteBanner.classList.add("hidden");
             }
 
             playerOverlay.style.color = "#88937d";
