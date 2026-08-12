@@ -1715,25 +1715,45 @@
                 toggleFullscreen();
             });
 
+            // =========================================================
+            // KEYBOARD SHORTCUTS
+            // ←  : Kênh trước
+            // →  : Kênh sau
+            // F  : Toàn màn hình
+            // X  : Trỏ về kênh đang phát
+            // H  : Trở về màn hình đang phát
+            // Không xử lý shortcut khi đang nhập vào ô INPUT/TEXTAREA.
+            // =========================================================
             document.addEventListener("keydown", (e) => {
                 if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
                 switch (e.key) {
-                    case " ":
-                        e.preventDefault();
-                        playBtn.click();
-                        break;
                     case "ArrowLeft":
                         e.preventDefault();
                         previousBtn.click();
                         break;
+
                     case "ArrowRight":
                         e.preventDefault();
                         nextBtn.click();
                         break;
+
                     case "f":
                     case "F":
                         e.preventDefault();
                         toggleFullscreen();
+                        break;
+
+                    case "x":
+                    case "X":
+                        e.preventDefault();
+                        scrollToActiveChannelInList();
+                        break;
+
+                    case "h":
+                    case "H":
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
                         break;
                 }
             });
