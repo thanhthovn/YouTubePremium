@@ -801,9 +801,8 @@
             setupEventListeners();
             loadPlaylist();
 
-            // Chỉ kiểm tra tên chương trình mỗi 1 giờ.
-            // Không tải lại EPG.
-            setInterval(updateCurrentProgram, 60 * 60 * 1000);
+            // Chỉ tải/cập nhật EPG khi vào trang web hoặc đổi playlist.
+            // Không tự động cập nhật EPG theo thời gian.
         });
 
         async function switchPlaylist(playlistId) {
