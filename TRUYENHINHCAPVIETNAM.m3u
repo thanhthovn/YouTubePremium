@@ -126,7 +126,7 @@ https://live.huetv.com.vn/TRT-Online/chunklist.m3u8
 #EXTINF:-1 tvg-id="danang1" group-title="📡BÁO và PTTH Địa phương" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/danang1.png", ĐNRT1 | Báo và PTTH TP Đà Nẵng
 https://live.mediatech.vn/live/285b59a111d76974225a8e3004bfc31a509/playlist.m3u8
 #EXTINF:-1 tvg-id="danang2" group-title="📡BÁO và PTTH Địa phương" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/danang2.png", ĐNRT2 | Báo và PTTH TP Đà Nẵng
-https://live.mediatech.vn/live/2859145290d0d7947ef88b6240123b62474/chunklist.m3u8
+https://live.mediatech.vn/live/2859145290d0d7947ef88b6240123b62474/playlist.m3u8
 
 #EXTINF:-1 tvg-id="caobang" group-title="📡BÁO và PTTH Địa phương" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/caobang.png", CRTV HD | Báo và PTTH Cao Bằng
 https://stream.thingnet.vn/live/smil:CRTV.smil/playlist.m3u8
