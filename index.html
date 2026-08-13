@@ -617,13 +617,13 @@
                         <div id="programDesc"></div>
                     </div>
 <div id="playerOverlay" class="player-overlay">
-                        Đang tải danh sách kênh...
+                        Đang tải danh sách kênh.....
                     </div>
 
 
                     
                     <div id="unmuteBanner" class="unmute-banner hidden">
-                        🔊 BẬT ÂM THANH!
+                        🔊 [BẬT ÂM THANH!]
                     </div>
 <div class="video-controls">
                         <div class="progress-row">
@@ -663,7 +663,7 @@
                 </div>
 
                 <div id="channelList" class="channel-list">
-                    <div class="loading">⏳ Đang tải danh sách kênh...</div>
+                    <div class="loading">⏳ Đang tải danh sách kênh.....</div>
                 </div>
             </aside>
         </div>
@@ -862,7 +862,7 @@
                 channelGroupFilter.value = "__ALL__";
             }
 
-            channelList.innerHTML = '<div class="loading">⏳ Đang tải danh sách...</div>';
+            channelList.innerHTML = '<div class="loading">⏳ Đang tải danh sách.....</div>';
             channelCount.textContent = "0 KÊNH";
             updatePlaylistButton();
 
@@ -939,7 +939,7 @@
             );
 
             if (xml.querySelector("parsererror")) {
-                throw new Error("EPG XML không hợp lệ.");
+                throw new Error("EPG XML không hợp lệ!");
             }
 
             const data = Object.create(null);
@@ -1201,7 +1201,7 @@
 
                 console.error("PLAYLIST ERROR:", error);
                 channelList.innerHTML =
-                    '<div class="empty">❌ Không tải được playlist.</div>';
+                    '<div class="empty">❌ Không tải được playlist!</div>';
             }
         }
 
@@ -1479,7 +1479,7 @@
             console.error("Lỗi phát luồng video:", err);
             playerOverlay.style.color = "#f87171";
             playerOverlay.classList.remove("hidden");
-            playerOverlay.textContent = "KÊNH NÀY KHÔNG PHÁT ĐƯỢC, VUI LÒNG CHỌN KÊNH KHÁC!";
+            playerOverlay.textContent = "KÊNH NÀY KHÔNG PHÁT ĐƯỢC! VUI LÒNG CHỌN KÊNH KHÁC!";
             updatePlayButton();
         }
 
