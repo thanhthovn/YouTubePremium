@@ -468,6 +468,99 @@
             white-space: nowrap;
         }
 
+        .channel-count.import-btn {
+            width: auto;
+            min-width: 96px;
+            height: 34px;
+            padding: 0 12px;
+            border: 1px solid var(--military-border);
+            border-radius: 6px;
+            background: #182314;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .channel-count.import-btn:hover,
+        .channel-count.import-btn:focus {
+            color: var(--text-main);
+            border-color: var(--military-light);
+            background: #22301b;
+            outline: none;
+        }
+
+        .temp-m3u-box {
+            display: none;
+            padding: 10px 15px;
+            background: #11180e;
+            border-bottom: 1px solid var(--military-border);
+        }
+
+        .temp-m3u-box.open {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .temp-m3u-input {
+            flex: 1 1 auto;
+            min-width: 0;
+            height: 34px;
+            padding: 0 10px;
+            border: 1px solid var(--military-border);
+            border-radius: 6px;
+            background: #182314;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .temp-m3u-input:focus {
+            border-color: var(--military-light);
+        }
+
+        .temp-m3u-action {
+            height: 34px;
+            padding: 0 12px;
+            border: 1px solid var(--military-border);
+            border-radius: 6px;
+            background: #263b20;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .temp-m3u-action:hover {
+            background: var(--military-light);
+        }
+
+        .temp-m3u-action.load {
+            background: #7f1d1d;
+            border-color: #ef4444;
+        }
+
+        .temp-m3u-action.load:hover {
+            background: #991b1b;
+        }
+
+        .temp-m3u-status {
+            width: 100%;
+            margin-top: 7px;
+            color: var(--text-muted);
+            font-size: 11px;
+            line-height: 1.3;
+        }
+
+        .temp-m3u-wrap {
+            width: 100%;
+        }
+
         .channel-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -601,6 +694,28 @@
             .channel-count {
                 font-size: 9px;
             }
+
+            .channel-count.import-btn {
+                min-width: 82px;
+                height: 30px;
+                padding: 0 8px;
+                font-size: 10px;
+            }
+
+            .temp-m3u-box.open {
+                align-items: stretch;
+                flex-wrap: wrap;
+            }
+
+            .temp-m3u-input {
+                flex: 1 1 100%;
+                font-size: 12px;
+            }
+
+            .temp-m3u-action {
+                flex: 1 1 auto;
+                font-size: 11px;
+            }
         }
     </style>
 </head>
@@ -658,7 +773,26 @@
                             <option value="__ALL__">Tất cả các kênh</option>
                         </select>
 
-                        <span id="channelCount" class="channel-count">0 KÊNH</span>
+                        <button id="channelCount" class="channel-count import-btn" type="button" title="Import M3U tạm thời">0 KÊNH</button>
+                    </div>
+                </div>
+
+                <div id="tempM3uBox" class="temp-m3u-box">
+                    <div class="temp-m3u-wrap">
+                        <div style="display:flex;gap:8px;width:100%;">
+                            <input
+                                id="tempM3uInput"
+                                class="temp-m3u-input"
+                                type="url"
+                                inputmode="url"
+                                autocomplete="off"
+                                placeholder="Dán link M3U tạm thời..."
+                                aria-label="Link M3U tạm thời"
+                            >
+                            <button id="tempM3uLoadBtn" class="temp-m3u-action load" type="button">IMPORT</button>
+                            <button id="tempM3uCloseBtn" class="temp-m3u-action" type="button">ĐÓNG</button>
+                        </div>
+                        <div id="tempM3uStatus" class="temp-m3u-status"></div>
                     </div>
                 </div>
 
@@ -735,6 +869,11 @@
         const unmuteBanner = document.getElementById("unmuteBanner");
         const channelList = document.getElementById("channelList");
         const channelCount = document.getElementById("channelCount");
+        const tempM3uBox = document.getElementById("tempM3uBox");
+        const tempM3uInput = document.getElementById("tempM3uInput");
+        const tempM3uLoadBtn = document.getElementById("tempM3uLoadBtn");
+        const tempM3uCloseBtn = document.getElementById("tempM3uCloseBtn");
+        const tempM3uStatus = document.getElementById("tempM3uStatus");
         const playlistSwitchBtn = document.getElementById("playlistSwitchBtn");
         const channelGroupFilter = document.getElementById("channelGroupFilter");
         let selectedChannelGroup = "__ALL__";
@@ -867,6 +1006,7 @@
             updatePlaylistButton();
 
             await loadPlaylist(requestId, playlistAbortController.signal);
+            closeTempM3uBox();
         }
 
         function decodeXmlEntities(value = "") {
@@ -1202,6 +1342,11 @@
                 console.error("PLAYLIST ERROR:", error);
                 channelList.innerHTML =
                     '<div class="empty">❌ Không tải được playlist!</div>';
+
+                if (currentPlaylistId === "temporary") {
+                    channelCount.textContent = "0 KÊNH";
+                    setTempM3uStatus("Không tải được M3U. Kiểm tra link hoặc CORS.", true);
+                }
             }
         }
 
@@ -1488,6 +1633,12 @@
         }
 
         function updatePlaylistButton() {
+            if (currentPlaylistId === "temporary") {
+                playlistSwitchBtn.textContent = "🔗";
+                playlistSwitchBtn.title = "ĐANG DÙNG M3U TẠM THỜI";
+                return;
+            }
+
             playlistSwitchBtn.textContent = currentPlaylistId === "tv" ? "📺" : "🎬";
             playlistSwitchBtn.title = currentPlaylistId === "tv" ? "ĐANG XEM TIVI" : "ĐANG XEM PHIM RẠP";
         }
@@ -1546,7 +1697,110 @@
             }, delay);
         }
 
+        function setTempM3uStatus(message, isError = false) {
+            if (!tempM3uStatus) return;
+            tempM3uStatus.textContent = message || "";
+            tempM3uStatus.style.color = isError ? "#f87171" : "var(--text-muted)";
+        }
+
+        function openTempM3uBox() {
+            if (!tempM3uBox) return;
+            tempM3uBox.classList.add("open");
+            setTempM3uStatus("");
+            setTimeout(() => {
+                try { tempM3uInput?.focus(); } catch (_) {}
+            }, 0);
+        }
+
+        function closeTempM3uBox() {
+            if (!tempM3uBox) return;
+            tempM3uBox.classList.remove("open");
+            setTempM3uStatus("");
+        }
+
+        async function importTemporaryM3u() {
+            const url = String(tempM3uInput?.value || "").trim();
+
+            if (!url) {
+                setTempM3uStatus("Vui lòng nhập link M3U.", true);
+                return;
+            }
+
+            if (!/^https?:\/\//i.test(url)) {
+                setTempM3uStatus("Link M3U phải bắt đầu bằng http:// hoặc https://", true);
+                return;
+            }
+
+            // M3U tạm thời: không lưu localStorage, không thêm vào PLAYLISTS.
+            // F5/reload trang sẽ quay lại playlist gốc.
+            const requestId = ++playlistRequestId;
+
+            if (playlistAbortController) {
+                try { playlistAbortController.abort(); } catch (_) {}
+            }
+            playlistAbortController = new AbortController();
+
+            if (epgAbortController) {
+                try { epgAbortController.abort(); } catch (_) {}
+            }
+            epgAbortController = null;
+
+            ++playRequestId;
+
+            currentPlaylistId = "temporary";
+            M3U_URL = url;
+            currentChannelIndex = -1;
+
+            epgData = Object.create(null);
+            epgUrl = "";
+            epgLoaded = false;
+            epgLoading = null;
+            selectedChannelGroup = "__ALL__";
+
+            if (channelGroupFilter) {
+                channelGroupFilter.value = "__ALL__";
+            }
+
+            channelList.innerHTML = '<div class="loading">⏳ Đang tải M3U tạm thời.....</div>';
+            channelCount.textContent = "ĐANG TẢI";
+            updatePlaylistButton();
+            setTempM3uStatus("Đang tải playlist tạm thời...");
+
+            try {
+                await loadPlaylist(requestId, playlistAbortController.signal);
+
+                if (requestId !== playlistRequestId || playlistAbortController.signal.aborted) return;
+
+                if (channels.length > 0) {
+                    setTempM3uStatus(`Đã nạp ${channels.length} kênh tạm thời. Không lưu vào hệ thống.`);
+                    closeTempM3uBox();
+                } else {
+                    setTempM3uStatus("Playlist không có kênh.", true);
+                }
+            } catch (error) {
+                if (error?.name === "AbortError") return;
+                console.error("TEMP M3U ERROR:", error);
+                setTempM3uStatus("Không tải được M3U tạm thời. Kiểm tra link hoặc CORS.", true);
+            }
+        }
+
+
         function setupEventListeners() {
+            channelCount.addEventListener("click", openTempM3uBox);
+
+            tempM3uLoadBtn.addEventListener("click", importTemporaryM3u);
+            tempM3uCloseBtn.addEventListener("click", closeTempM3uBox);
+
+            tempM3uInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    importTemporaryM3u();
+                } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    closeTempM3uBox();
+                }
+            });
+
             channelGroupFilter.addEventListener("change", () => {
                 selectedChannelGroup = channelGroupFilter.value || "__ALL__";
                 renderChannels();
