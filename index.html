@@ -454,13 +454,38 @@
         .cinemax-btn:active {
             transform: scale(.96);
         }
-
         .channel-count {
-            color: var(--text-muted);
-            font-size: 20px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
             margin-left: auto;
-            flex-shrink: 0;
             white-space: nowrap;
+            height: 34px;
+            padding: 0 14px;
+            border: 1px solid #d13a3a;
+            border-radius: 6px;
+            background: #11180e;
+            cursor: pointer;
+            transition: background .15s, transform .15s, border-color .15s;
+        }
+
+        .channel-count:hover {
+            background: #c52b2b;
+            border-color: #ef4444;
+        }
+
+        .channel-count:active {
+            transform: scale(.96);
+        }
+
+        .channel-count:focus-visible {
+            outline: 2px solid #ef4444;
+            outline-offset: 2px;
+        }
+
+        .channel-count:disabled {
+            opacity: .65;
+            cursor: wait;
         }
 
         .channel-count.import-btn:hover,
@@ -599,9 +624,7 @@
                 flex: 1 1 100%;
             }
 
-            .channel-count {
-                font-size: 9px;
-            }
+            .channel-count { font-size: 11px; padding: 0 10px; }
         }
     </style>
 </head>
@@ -665,7 +688,7 @@
                            🎬
                         </button>
 
-                        <div id="channelCount" class="channel-count">0 KÊNH</div>
+                        <button id="channelCount" class="channel-count" type="button" title="Nhập link M3U để xem tạm thời">0 KÊNH</button>
                     </div>
                 </div><div id="channelList" class="channel-list">
                     <div class="loading">⏳ Đang tải danh sách kênh.....</div>
@@ -685,6 +708,7 @@
         let channels = [];
         let currentChannelIndex = -1;
         let hls = null;
+        let currentPlaylistUrl = M3U_URL;
 
         // =========================================================
         // LOW-END MODE
@@ -811,9 +835,9 @@ const channelGroupFilter = document.getElementById("channelGroupFilter");
             return textarea.value;
         }
 
-async function loadPlaylist(signal = null) {
+async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
             try {
-                const response = await fetch(M3U_URL, {
+                const response = await fetch(sourceUrl, {
                     cache: "no-store",
                     signal
                 });
@@ -827,7 +851,10 @@ async function loadPlaylist(signal = null) {
                     throw new Error("Playlist không có kênh");
                 }
 
+                // Chỉ đổi playlist sau khi tải và phân tích thành công.
                 channels = parsedChannels;
+                currentPlaylistUrl = sourceUrl;
+
                 updateChannelGroupFilter();
                 renderChannels();
 
@@ -841,8 +868,11 @@ async function loadPlaylist(signal = null) {
                 if (error?.name === "AbortError") return;
 
                 console.error("PLAYLIST ERROR:", error);
-                channelList.innerHTML =
-                    '<div class="empty">❌ Không tải được playlist!</div>';
+                alert(
+                    "❌ Không tải được link M3U này.\n\n" +
+                    "Hãy kiểm tra lại link, CORS hoặc playlist có đúng định dạng M3U/M3U8 hay không."
+                );
+                throw error;
             }
         }
 
@@ -1356,6 +1386,49 @@ async function loadPlaylist(signal = null) {
             // Nút CINEMAX: mở trang xem phim ở tab mới
             cinemaxBtn.addEventListener("click", () => {
                 window.open(CINEMAX_URL, "_blank", "noopener,noreferrer");
+            });
+
+            // =========================================================
+            // NÚT SỐ KÊNH → NHẬP LINK M3U XEM TẠM THỜI
+            // Playlist nhập ở đây chỉ có hiệu lực trong lần mở trang hiện tại.
+            // Không ghi đè M3U_URL gốc trong code.
+            // =========================================================
+            channelCount.addEventListener("click", async () => {
+                const url = window.prompt(
+                    "NHẬP LINK M3U ĐỂ XEM TẠM THỜI:\n\n" +
+                    "Playlist gốc sẽ không bị thay đổi.\n" +
+                    "Ví dụ: https://example.com/playlist.m3u",
+                    currentPlaylistUrl !== M3U_URL ? currentPlaylistUrl : ""
+                );
+
+                if (url === null) return;
+
+                const tempUrl = url.trim();
+
+                if (!tempUrl) {
+                    alert("⚠️ Vui lòng nhập link M3U.");
+                    return;
+                }
+
+                if (!/^https?:\/\//i.test(tempUrl)) {
+                    alert("⚠️ Link M3U phải bắt đầu bằng http:// hoặc https://");
+                    return;
+                }
+
+                const oldText = channelCount.textContent;
+                channelCount.disabled = true;
+                channelCount.textContent = "ĐANG TẢI...";
+
+                try {
+                    await loadPlaylist(tempUrl);
+                } catch (_) {
+                    // loadPlaylist đã hiển thị thông báo lỗi.
+                } finally {
+                    channelCount.disabled = false;
+                    if (channelCount.textContent === "ĐANG TẢI...") {
+                        channelCount.textContent = oldText;
+                    }
+                }
             });
 
             // =========================================================
