@@ -406,7 +406,7 @@
             max-width: 300px;
             height: 34px;
             padding: 0 6px;
-            border: 1px solid var(--military-border);
+            border: 1px solid #d13a3a;
             border-radius: 6px;
             background: #182314;
             color: var(--text-main);
@@ -427,12 +427,13 @@
             color: var(--text-main);
         }
 
-        .calendar-btn {
+        .calendar-btn,
+        .cinemax-btn {
             height: 34px;
             padding: 0 14px;
             border: 1px solid #d13a3a;
             border-radius: 6px;
-            background: #a51f1f;
+            background: #11180e;
             color: #ffffff;
             font-family: sans-serif, Arial, Helvetica;
             font-size: 16px;
@@ -443,12 +444,14 @@
             transition: background .15s, transform .15s, border-color .15s;
         }
 
-        .calendar-btn:hover {
+        .calendar-btn:hover,
+        .cinemax-btn:hover {
             background: #c52b2b;
             border-color: #ef4444;
         }
 
-        .calendar-btn:active {
+        .calendar-btn:active,
+        .cinemax-btn:active {
             transform: scale(.96);
         }
 
@@ -658,6 +661,10 @@
                            📅
                         </button>
 
+                        <button id="cinemaxBtn" class="cinemax-btn" type="button" title="Xem CINEMAX">
+                           🎬 CINEMAX
+                        </button>
+
                         <div id="channelCount" class="channel-count">0 KÊNH</div>
                     </div>
                 </div><div id="channelList" class="channel-list">
@@ -673,6 +680,7 @@
         // Website xem lịch chương trình
         // Có thể đổi URL này thành website lịch mà bạn muốn.
         const CALENDAR_URL = "https://thanhthovn.github.io/amlichvn/";
+        const CINEMAX_URL = "https://thanhthovn.github.io/phanthietphim/";
 
         let channels = [];
         let currentChannelIndex = -1;
@@ -720,6 +728,7 @@ const channelGroupFilter = document.getElementById("channelGroupFilter");
         const fullscreenBtn = document.getElementById("fullscreenBtn");
         const activeChannelLogo = document.getElementById("activeChannelLogo");
         const calendarBtn = document.getElementById("calendarBtn");
+        const cinemaxBtn = document.getElementById("cinemaxBtn");
 
         let progressSeekable = false;
 
@@ -1342,6 +1351,11 @@ async function loadPlaylist(signal = null) {
             // Nút XEM LỊCH: mở website lịch ở tab mới
             calendarBtn.addEventListener("click", () => {
                 window.open(CALENDAR_URL, "_blank", "noopener,noreferrer");
+            });
+
+            // Nút CINEMAX: mở trang xem phim ở tab mới
+            cinemaxBtn.addEventListener("click", () => {
+                window.open(CINEMAX_URL, "_blank", "noopener,noreferrer");
             });
 
             // =========================================================
