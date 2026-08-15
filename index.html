@@ -427,6 +427,31 @@
             color: var(--text-main);
         }
 
+        .calendar-btn {
+            height: 34px;
+            padding: 0 14px;
+            border: 1px solid #d13a3a;
+            border-radius: 6px;
+            background: #a51f1f;
+            color: #ffffff;
+            font-family: sans-serif, Arial, Helvetica;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: background .15s, transform .15s, border-color .15s;
+        }
+
+        .calendar-btn:hover {
+            background: #c52b2b;
+            border-color: #ef4444;
+        }
+
+        .calendar-btn:active {
+            transform: scale(.96);
+        }
+
         .channel-count {
             color: var(--text-muted);
             font-size: 20px;
@@ -595,7 +620,7 @@
 
 
                     <div id="unmuteBanner" class="unmute-banner hidden">
-                        🔊 [BẬT ÂM THANH!]
+                        🔊 [BẬT ÂM THANH]
                     </div>
 <div class="video-controls">
                         <div class="progress-row">
@@ -629,6 +654,10 @@
                             <option value="__ALL__">Tất cả các kênh</option>
                         </select>
 
+                        <button id="calendarBtn" class="calendar-btn" type="button" title="Xem lịch Âm">
+                           📅
+                        </button>
+
                         <div id="channelCount" class="channel-count">0 KÊNH</div>
                     </div>
                 </div><div id="channelList" class="channel-list">
@@ -640,6 +669,11 @@
 
     <script>
         const M3U_URL = "https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/main/TRUYENHINHCAPVIETNAM.m3u";
+
+        // Website xem lịch chương trình
+        // Có thể đổi URL này thành website lịch mà bạn muốn.
+        const CALENDAR_URL = "https://thanhthovn.github.io/amlichvn/";
+
         let channels = [];
         let currentChannelIndex = -1;
         let hls = null;
@@ -685,6 +719,7 @@ const channelGroupFilter = document.getElementById("channelGroupFilter");
         const durationTimeEl = document.getElementById("durationTime");
         const fullscreenBtn = document.getElementById("fullscreenBtn");
         const activeChannelLogo = document.getElementById("activeChannelLogo");
+        const calendarBtn = document.getElementById("calendarBtn");
 
         let progressSeekable = false;
 
@@ -1302,6 +1337,11 @@ async function loadPlaylist(signal = null) {
                 e.preventDefault();
                 e.stopPropagation();
                 toggleFullscreen();
+            });
+
+            // Nút XEM LỊCH: mở website lịch ở tab mới
+            calendarBtn.addEventListener("click", () => {
+                window.open(CALENDAR_URL, "_blank", "noopener,noreferrer");
             });
 
             // =========================================================
