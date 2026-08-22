@@ -592,6 +592,115 @@
             grid-column: 1 / -1;
         }
 
+
+        /* =========================================================
+           HỘP NHẬP LINK M3U / M3U8
+           ========================================================= */
+        .playlist-choice-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(4px);
+        }
+
+        .playlist-choice-box {
+            width: min(520px, 100%);
+            padding: 20px;
+            border: 2px solid var(--military-border);
+            border-radius: 12px;
+            background: linear-gradient(145deg, #182314, #0b1009);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.65);
+        }
+
+        .playlist-choice-title {
+            margin-bottom: 18px;
+            color: #ffffff;
+            font-size: 19px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .playlist-choice-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .playlist-choice-label {
+            grid-column: 1 / -1;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .playlist-choice-input {
+            width: 100%;
+            min-width: 0;
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid #d13a3a;
+            border-radius: 6px;
+            outline: none;
+            background: #11180e;
+            color: #ffffff;
+            font-family: sans-serif, Arial, Helvetica;
+            font-size: 14px;
+        }
+
+        .playlist-choice-input::placeholder {
+            color: #77826d;
+        }
+
+        .playlist-choice-input:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+        }
+
+        .playlist-choice-ok {
+            width: 70px;
+            height: 42px;
+            border: 1px solid #d13a3a;
+            border-radius: 6px;
+            background: #a51f1f;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .playlist-choice-ok:hover {
+            background: #c52b2b;
+            border-color: #ef4444;
+        }
+
+        .playlist-choice-ok:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
+
+        .playlist-choice-cancel {
+            width: 100%;
+            height: 38px;
+            margin-top: 4px;
+            border: 1px solid var(--military-border);
+            border-radius: 6px;
+            background: #263b20;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .playlist-choice-cancel:hover {
+            background: #536a3c;
+        }
+
         @media (max-width: 600px) {
             .unmute-banner {
                 top: 8px !important;
@@ -702,7 +811,7 @@
                            🧩
                         </button>
 
-                        <button id="channelCount" class="channel-count" type="button" title="Nhập link M3U để xem tạm thời">0 KÊNH</button>
+                        <button id="channelCount" class="channel-count" type="button" title="Đọc M3U hoặc xem trực tiếp M3U8">0 KÊNH</button>
                     </div>
                 </div><div id="channelList" class="channel-list">
                     <div class="loading">⏳ Đang tải danh sách kênh.....</div>
@@ -849,6 +958,141 @@ const channelGroupFilter = document.getElementById("channelGroupFilter");
             const textarea = document.createElement("textarea");
             textarea.innerHTML = value;
             return textarea.value;
+        }
+
+
+        // =========================================================
+        // PHÁT TRỰC TIẾP LINK M3U8
+        // - Không cần playlist M3U.
+        // - Link được đưa thẳng vào HLS.js / native HLS.
+        // - Không làm thay đổi playlist M3U hiện tại.
+        // =========================================================
+        async function playDirectM3U8(url) {
+            const requestId = ++playRequestId;
+            const directUrl = String(url || "").trim();
+
+            if (!directUrl) {
+                alert("⚠️ Vui lòng nhập link M3U8.");
+                return;
+            }
+
+            if (!/^https?:\/\//i.test(directUrl)) {
+                alert("⚠️ Link M3U8 phải bắt đầu bằng http:// hoặc https://");
+                return;
+            }
+
+            if (hls) {
+                try { hls.stopLoad(); } catch (_) {}
+                try { hls.destroy(); } catch (_) {}
+                hls = null;
+            }
+
+            try { video.pause(); } catch (_) {}
+            video.removeAttribute("src");
+            try { video.load(); } catch (_) {}
+
+            if (requestId !== playRequestId) return;
+
+            currentChannelIndex = -1;
+
+            document.querySelectorAll(".channel.active").forEach(el => {
+                el.classList.remove("active");
+            });
+
+            activeChannelLogo.removeAttribute("src");
+            activeChannelLogo.style.display = "none";
+
+            playerTitle.textContent = "M3U8 STREAMING...";
+            playerTitle.classList.remove("title-hidden");
+
+            playerOverlay.style.color = "#88937d";
+            playerOverlay.classList.remove("hidden");
+            playerOverlay.textContent = "ĐANG TẢI LINK M3U8.....";
+
+            progressSeekable = false;
+            progress.classList.add("live-only");
+            progress.value = 100;
+            setProgressVisual(100);
+            currentTimeEl.textContent = "00:00";
+            durationTimeEl.textContent = "LIVE";
+
+            showVideoControls();
+
+            const handleDirectPlaySuccess = () => {
+                if (requestId !== playRequestId) return;
+                playerOverlay.classList.add("hidden");
+                updatePlayButton();
+            };
+
+            const handleDirectPlayError = (err) => {
+                if (requestId !== playRequestId) return;
+                console.error("Lỗi phát link M3U8:", err);
+                playerOverlay.style.color = "#f87171";
+                playerOverlay.classList.remove("hidden");
+                playerOverlay.textContent =
+                    "LINK M3U8 KHÔNG PHÁT ĐƯỢC! VUI LÒNG KIỂM TRA LINK!";
+                updatePlayButton();
+            };
+
+            if (video.canPlayType("application/vnd.apple.mpegurl")) {
+                video.src = directUrl;
+                video.play()
+                    .then(handleDirectPlaySuccess)
+                    .catch(handleDirectPlayError);
+                return;
+            }
+
+            if (window.Hls && Hls.isSupported()) {
+                hls = new Hls(LOW_END_HLS_CONFIG);
+
+                if (requestId !== playRequestId) {
+                    try { hls.destroy(); } catch (_) {}
+                    hls = null;
+                    return;
+                }
+
+                hls.loadSource(directUrl);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (requestId !== playRequestId) return;
+
+                    video.play()
+                        .then(handleDirectPlaySuccess)
+                        .catch(handleDirectPlayError);
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (requestId !== playRequestId) return;
+                    if (!data.fatal) return;
+
+                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                        setTimeout(() => {
+                            if (requestId !== playRequestId || !hls) return;
+                            try { hls.startLoad(); } catch (_) {}
+                        }, 800);
+                        return;
+                    }
+
+                    if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                        try {
+                            hls.recoverMediaError();
+                        } catch (_) {
+                            handleDirectPlayError(data);
+                        }
+                        return;
+                    }
+
+                    handleDirectPlayError(data);
+                });
+
+                return;
+            }
+
+            video.src = directUrl;
+            video.play()
+                .then(handleDirectPlaySuccess)
+                .catch(handleDirectPlayError);
         }
 
 async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
@@ -1095,6 +1339,9 @@ async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
             } else if (!video.muted) {
                 unmuteBanner.classList.add("hidden");
             }
+
+            playerTitle.textContent = channel.name;
+            playerTitle.classList.remove("title-hidden");
 
             playerOverlay.style.color = "#88937d";
             playerOverlay.classList.remove("hidden");
@@ -1410,46 +1657,137 @@ async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
             });
 
             // =========================================================
-            // NÚT SỐ KÊNH → NHẬP LINK M3U XEM TẠM THỜI
-            // Playlist nhập ở đây chỉ có hiệu lực trong lần mở trang hiện tại.
-            // Không ghi đè M3U_URL gốc trong code.
+            // NÚT SỐ KÊNH → 2 Ô NHẬP RIÊNG:
+            // 1. Link M3U
+            // 2. Link M3U8 trực tiếp
             // =========================================================
             channelCount.addEventListener("click", async () => {
-                const url = window.prompt(
-                    "NHẬP LINK M3U ĐỂ XEM TẠM THỜI:\n\n" +
-                    "Playlist gốc sẽ không bị thay đổi.\n" +
-                    "Ví dụ: https://example.com/playlist.m3u",
-                    currentPlaylistUrl !== M3U_URL ? currentPlaylistUrl : ""
-                );
+                const modal = document.createElement("div");
+                modal.className = "playlist-choice-modal";
 
-                if (url === null) return;
+                modal.innerHTML = `
+                    <div class="playlist-choice-box">
+                        <div class="playlist-choice-title">📺 CHỌN LINK PHÁT</div>
 
-                const tempUrl = url.trim();
+                        <div class="playlist-choice-item">
+                            <div class="playlist-choice-label">📋 LINK M3U</div>
+                            <input
+                                id="m3uInput"
+                                class="playlist-choice-input"
+                                type="url"
+                                placeholder="https://example.com/playlist.m3u"
+                                value="${currentPlaylistUrl !== M3U_URL ? currentPlaylistUrl : ""}"
+                            >
+                            <button id="m3uOkBtn" class="playlist-choice-ok" type="button">OK</button>
+                        </div>
 
-                if (!tempUrl) {
-                    alert("⚠️ Vui lòng nhập link M3U.");
-                    return;
-                }
+                        <div class="playlist-choice-item">
+                            <div class="playlist-choice-label">▶️ LINK M3U8 TRỰC TIẾP</div>
+                            <input
+                                id="m3u8Input"
+                                class="playlist-choice-input"
+                                type="url"
+                                placeholder="https://example.com/live/stream.m3u8"
+                            >
+                            <button id="m3u8OkBtn" class="playlist-choice-ok" type="button">OK</button>
+                        </div>
 
-                if (!/^https?:\/\//i.test(tempUrl)) {
-                    alert("⚠️ Link M3U phải bắt đầu bằng http:// hoặc https://");
-                    return;
-                }
+                        <button id="playlistCancelBtn" class="playlist-choice-cancel" type="button">
+                            HỦY
+                        </button>
+                    </div>
+                `;
 
-                const oldText = channelCount.textContent;
-                channelCount.disabled = true;
-                channelCount.textContent = "ĐANG TẢI...";
+                document.body.appendChild(modal);
 
-                try {
-                    await loadPlaylist(tempUrl);
-                } catch (_) {
-                    // loadPlaylist đã hiển thị thông báo lỗi.
-                } finally {
-                    channelCount.disabled = false;
-                    if (channelCount.textContent === "ĐANG TẢI...") {
-                        channelCount.textContent = oldText;
+                const m3uInput = modal.querySelector("#m3uInput");
+                const m3u8Input = modal.querySelector("#m3u8Input");
+                const m3uOkBtn = modal.querySelector("#m3uOkBtn");
+                const m3u8OkBtn = modal.querySelector("#m3u8OkBtn");
+                const cancelBtn = modal.querySelector("#playlistCancelBtn");
+
+                const closeModal = () => {
+                    modal.remove();
+                };
+
+                cancelBtn.addEventListener("click", closeModal);
+
+                modal.addEventListener("click", (e) => {
+                    if (e.target === modal) closeModal();
+                });
+
+                // ---------------------------------------------------------
+                // NÚT OK M3U
+                // ---------------------------------------------------------
+                m3uOkBtn.addEventListener("click", async () => {
+                    const tempUrl = m3uInput.value.trim();
+
+                    if (!tempUrl) {
+                        alert("⚠️ Vui lòng nhập link M3U.");
+                        m3uInput.focus();
+                        return;
                     }
-                }
+
+                    if (!/^https?:\/\//i.test(tempUrl)) {
+                        alert("⚠️ Link M3U phải bắt đầu bằng http:// hoặc https://");
+                        m3uInput.focus();
+                        return;
+                    }
+
+                    m3uOkBtn.disabled = true;
+                    m3uOkBtn.textContent = "ĐANG TẢI...";
+
+                    try {
+                        await loadPlaylist(tempUrl);
+                        closeModal();
+                    } catch (_) {
+                        // loadPlaylist đã hiển thị thông báo lỗi.
+                    } finally {
+                        m3uOkBtn.disabled = false;
+                        m3uOkBtn.textContent = "OK";
+                    }
+                });
+
+                // ---------------------------------------------------------
+                // NÚT OK M3U8
+                // ---------------------------------------------------------
+                m3u8OkBtn.addEventListener("click", async () => {
+                    const directUrl = m3u8Input.value.trim();
+
+                    if (!directUrl) {
+                        alert("⚠️ Vui lòng nhập link M3U8.");
+                        m3u8Input.focus();
+                        return;
+                    }
+
+                    if (!/^https?:\/\//i.test(directUrl)) {
+                        alert("⚠️ Link M3U8 phải bắt đầu bằng http:// hoặc https://");
+                        m3u8Input.focus();
+                        return;
+                    }
+
+                    m3u8OkBtn.disabled = true;
+                    m3u8OkBtn.textContent = "ĐANG PHÁT...";
+
+                    try {
+                        await playDirectM3U8(directUrl);
+                        closeModal();
+                    } finally {
+                        m3u8OkBtn.disabled = false;
+                        m3u8OkBtn.textContent = "OK";
+                    }
+                });
+
+                // Enter trong từng ô = bấm OK tương ứng.
+                m3uInput.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") m3uOkBtn.click();
+                });
+
+                m3u8Input.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") m3u8OkBtn.click();
+                });
+
+                setTimeout(() => m3uInput.focus(), 0);
             });
 
             // =========================================================
