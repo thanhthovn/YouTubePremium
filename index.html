@@ -698,6 +698,10 @@
                            🎬
                         </button>
 
+                        <button id="downloadAppBtn" class="cinemax-btn download-app-btn" type="button" title="TẢI ỨNG DỤNG">
+                           🛠️
+                        </button>
+
                         <button id="channelCount" class="channel-count" type="button" title="Nhập link M3U để xem tạm thời">0 KÊNH</button>
                     </div>
                 </div><div id="channelList" class="channel-list">
@@ -714,6 +718,7 @@
         // Có thể đổi URL này thành website lịch mà bạn muốn.
         const CALENDAR_URL = "https://thanhthovn.github.io/amlichvn/";
         const CINEMAX_URL = "https://thanhthovn.github.io/phanthietphim/";
+        const DOWNLOAD_APP_URL = "https://thanhthovn.github.io/updown/";
 
         let channels = [];
         let currentChannelIndex = -1;
@@ -763,6 +768,7 @@ const channelGroupFilter = document.getElementById("channelGroupFilter");
         const activeChannelLogo = document.getElementById("activeChannelLogo");
         const calendarBtn = document.getElementById("calendarBtn");
         const cinemaxBtn = document.getElementById("cinemaxBtn");
+        const downloadAppBtn = document.getElementById("downloadAppBtn");
 
         let progressSeekable = false;
 
@@ -1396,6 +1402,11 @@ async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
             // Nút CINEMAX: mở trang xem phim ở tab mới
             cinemaxBtn.addEventListener("click", () => {
                 window.open(CINEMAX_URL, "_blank", "noopener,noreferrer");
+            });
+
+            // Nút TẢI APP: mở đúng trang download ở tab mới
+            downloadAppBtn.addEventListener("click", () => {
+                window.open("https://thanhthovn.github.io/updown/", "_blank", "noopener,noreferrer");
             });
 
             // =========================================================
