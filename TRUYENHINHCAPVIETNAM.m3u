@@ -61,7 +61,7 @@ https://live.fptplay53.net/epzsd1/lamdong_hls.smil/chunklist.m3u8
 
 #EXTINF:-1 tvg-id="sctv2hd" group-title="🛰️SCTV" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/sctv2todaytv.png", SCTV2 | TODAY TV
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57
-https://live.fptplay53.net/epzsd1/sctv2_hls.smil/chunklist.m3u8
+https://ec04-pop5-hht.tv360.vn/bpk-token/xrt2kuy4uwsfhbyk5fx32z5fko6gpjkt/bpk-tv/343/output/343-audio_214835_und_iv_1=214800-video_iv_1=1064800.m3u8
 
 #EXTINF:-1 tvg-id="vinhlong1hd" group-title="📡BÁO và PTTH Địa phương" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/vinhlong1.png", THVL1 | Báo và PTTH Vĩnh Long
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57
