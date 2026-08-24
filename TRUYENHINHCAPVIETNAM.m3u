@@ -408,15 +408,15 @@ https://freem3u.xyz/api/live/play.m3u8?vid=99
 https://cdn.inteltelevision.com/4987/cctv8hd/playlist.m3u8?t=1779156466&token=500e97de8f291bdc41ef449faf94e205
 
 
-#EXTINF:-1 tvg-id="" group-title="⚽ LIVE SCORE" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/livestream.png", LIVE 1
+#EXTINF:-1 tvg-id="" group-title="🔴LIVE⚽" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/live.png", 🔴LIVE⚽ 1️⃣
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57
 https://myip.pdtvhd.com/Sports/streams/sporttv1.m3u8
 
-#EXTINF:-1 tvg-id="" group-title="⚽ LIVE SCORE" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/livestream.png", LIVE 2
+#EXTINF:-1 tvg-id="" group-title="🔴LIVE⚽" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/live.png", 🔴LIVE⚽ 2️⃣
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57
 https://myip.pdtvhd.com/Sports/streams/beINSports1.m3u8
 
-#EXTINF:-1 tvg-id="" group-title="⚽ LIVE SCORE" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/livestream.png", LIVE 3
+#EXTINF:-1 tvg-id="" group-title="🔴LIVE⚽" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/live.png", 🔴LIVE⚽ 3️⃣
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57
 https://media-tyo.hls.nhkworld.jp/hls/w/live/1/sig/b95e9aa9a33513b4d3416b7a201ec82c0d5e59c711f7fb0191d49f299d05b62e/a1.m3u8
 
