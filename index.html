@@ -342,41 +342,6 @@
             color: #a6e063;
         }
 
-        .time-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            height: 36px;
-            flex-shrink: 0;
-        }
-
-        .live-dot {
-            width: 9px;
-            height: 9px;
-            background-color: #ef4444;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px #ef4444;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
-        .live-text {
-            color: #ffffff;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-
         .control-spacer {
             flex: 1;
         }
@@ -781,11 +746,7 @@
                             <button id="previousBtn" class="control-btn" type="button" title="Kênh trước">⏮</button>
                             <button id="playBtn" class="control-btn play-btn" type="button" title="Phát / Tạm dừng">▶</button>
                             <button id="nextBtn" class="control-btn" type="button" title="Kênh tiếp theo">⏭</button>
-                            <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>                            <div class="time-badge">
-                                <span class="live-dot"></span>
-                                <span class="live-text">LIVE</span>
-                            </div>
-                            <div class="control-spacer"></div>
+                            <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>                            <div class="control-spacer"></div>
                             <button id="fullscreenBtn" class="control-btn" type="button" title="Toàn màn hình">⛶</button>
                         </div>
                     </div>
@@ -831,6 +792,7 @@
 
         let channels = [];
         let currentChannelIndex = -1;
+        let activeChannelCard = null;
         let hls = null;
         let currentPlaylistUrl = M3U_URL;
 
@@ -1018,84 +980,93 @@ const channelGroupFilter = document.getElementById("channelGroupFilter");
 
             showVideoControls();
 
-            const handleDirectPlaySuccess = () => {
-                if (requestId !== playRequestId) return;
-                playerOverlay.classList.add("hidden");
-                updatePlayButton();
-            };
+            return new Promise((resolve, reject) => {
+                let settled = false;
 
-            const handleDirectPlayError = (err) => {
-                if (requestId !== playRequestId) return;
-                console.error("Lỗi phát link M3U8:", err);
-                playerOverlay.style.color = "#f87171";
-                playerOverlay.classList.remove("hidden");
-                playerOverlay.textContent =
-                    "LINK M3U8 KHÔNG PHÁT ĐƯỢC! VUI LÒNG KIỂM TRA LINK!";
-                updatePlayButton();
-            };
+                const resolveOnce = () => {
+                    if (settled || requestId !== playRequestId) return;
+                    settled = true;
+                    playerOverlay.classList.add("hidden");
+                    updatePlayButton();
+                    resolve();
+                };
 
-            if (video.canPlayType("application/vnd.apple.mpegurl")) {
-                video.src = directUrl;
-                video.play()
-                    .then(handleDirectPlaySuccess)
-                    .catch(handleDirectPlayError);
-                return;
-            }
+                const rejectOnce = (err) => {
+                    if (settled || requestId !== playRequestId) return;
+                    settled = true;
+                    console.error("Lỗi phát link M3U8:", err);
+                    playerOverlay.style.color = "#f87171";
+                    playerOverlay.classList.remove("hidden");
+                    playerOverlay.textContent =
+                        "LINK M3U8 KHÔNG PHÁT ĐƯỢC! VUI LÒNG KIỂM TRA LINK!";
+                    updatePlayButton();
+                    reject(err);
+                };
 
-            if (window.Hls && Hls.isSupported()) {
-                hls = new Hls(LOW_END_HLS_CONFIG);
-
-                if (requestId !== playRequestId) {
-                    try { hls.destroy(); } catch (_) {}
-                    hls = null;
+                if (video.canPlayType("application/vnd.apple.mpegurl")) {
+                    video.src = directUrl;
+                    video.play()
+                        .then(resolveOnce)
+                        .catch(rejectOnce);
                     return;
                 }
 
-                hls.loadSource(directUrl);
-                hls.attachMedia(video);
+                if (window.Hls && Hls.isSupported()) {
+                    hls = new Hls(LOW_END_HLS_CONFIG);
 
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    if (requestId !== playRequestId) return;
-
-                    video.play()
-                        .then(handleDirectPlaySuccess)
-                        .catch(handleDirectPlayError);
-                });
-
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    if (requestId !== playRequestId) return;
-                    if (!data.fatal) return;
-
-                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                        setTimeout(() => {
-                            if (requestId !== playRequestId || !hls) return;
-                            try { hls.startLoad(); } catch (_) {}
-                        }, 800);
+                    if (requestId !== playRequestId) {
+                        try { hls.destroy(); } catch (_) {}
+                        hls = null;
+                        reject(new Error("Yêu cầu phát đã bị thay thế."));
                         return;
                     }
 
-                    if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-                        try {
-                            hls.recoverMediaError();
-                        } catch (_) {
-                            handleDirectPlayError(data);
+                    hls.loadSource(directUrl);
+                    hls.attachMedia(video);
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        if (requestId !== playRequestId) return;
+
+                        video.play()
+                            .then(resolveOnce)
+                            .catch(rejectOnce);
+                    });
+
+                    hls.on(Hls.Events.ERROR, (event, data) => {
+                        if (requestId !== playRequestId) return;
+                        if (!data.fatal) return;
+
+                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                            setTimeout(() => {
+                                if (requestId !== playRequestId || !hls) return;
+                                try { hls.startLoad(); } catch (_) {}
+                            }, 800);
+                            return;
                         }
-                        return;
-                    }
 
-                    handleDirectPlayError(data);
-                });
+                        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                            try {
+                                hls.recoverMediaError();
+                            } catch (_) {
+                                rejectOnce(data);
+                            }
+                            return;
+                        }
 
-                return;
-            }
+                        rejectOnce(data);
+                    });
 
-            video.src = directUrl;
-            video.play()
-                .then(handleDirectPlaySuccess)
-                .catch(handleDirectPlayError);
+                    return;
+                }
+
+                video.src = directUrl;
+                video.play()
+                    .then(resolveOnce)
+                    .catch(rejectOnce);
+            });
         }
 
-async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
+        async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
             try {
                 const response = await fetch(sourceUrl, {
                     cache: "no-store",
@@ -1220,6 +1191,7 @@ async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
 
         function renderChannels() {
             channelList.innerHTML = "";
+            activeChannelCard = null;
 
             const filteredChannels = getFilteredChannels();
             channelCount.textContent = filteredChannels.length + " KÊNH";
@@ -1235,6 +1207,10 @@ async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
                 const item = document.createElement("div");
                 item.dataset.channelIndex = String(index);
                 item.className = "channel" + (index === currentChannelIndex ? " active" : "");
+
+                if (index === currentChannelIndex) {
+                    activeChannelCard = item;
+                }
 
                 const logoContainer = document.createElement("div");
                 logoContainer.className = "channel-logo";
@@ -1311,16 +1287,17 @@ async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
             }
 
             // Chỉ đổi trạng thái active, không render lại toàn bộ danh sách.
-            document.querySelectorAll(".channel.active").forEach(el => {
-                el.classList.remove("active");
-            });
+            // Dùng reference đã lưu thay vì querySelectorAll() + querySelector() mỗi lần đổi kênh.
+            if (activeChannelCard) {
+                activeChannelCard.classList.remove("active");
+            }
 
-            const activeCard = document.querySelector(
+            activeChannelCard = channelList.querySelector(
                 `.channel[data-channel-index="${index}"]`
             );
 
-            if (activeCard) {
-                activeCard.classList.add("active");
+            if (activeChannelCard) {
+                activeChannelCard.classList.add("active");
             }
 
             if (scrollToTop) window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1525,12 +1502,24 @@ async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
             video.addEventListener("pause", showVideoControls);
             video.addEventListener("ended", showVideoControls);
 
-            video.addEventListener("timeupdate", updateProgressState);
-            video.addEventListener("durationchange", updateProgressState);
-            video.addEventListener("loadedmetadata", updateProgressState);
-            video.addEventListener("loadeddata", updateProgressState);
-            video.addEventListener("canplay", updateProgressState);
-            video.addEventListener("progress", updateProgressState);
+            // Giới hạn tần suất cập nhật progress/time label để giảm CPU trên máy yếu.
+            // Các event video có thể bắn rất dày, đặc biệt là timeupdate/progress.
+            let progressUpdateTimer = null;
+            const scheduleProgressUpdate = () => {
+                if (progressUpdateTimer !== null) return;
+
+                progressUpdateTimer = setTimeout(() => {
+                    progressUpdateTimer = null;
+                    updateProgressState();
+                }, 250);
+            };
+
+            video.addEventListener("timeupdate", scheduleProgressUpdate);
+            video.addEventListener("durationchange", scheduleProgressUpdate);
+            video.addEventListener("loadedmetadata", scheduleProgressUpdate);
+            video.addEventListener("loadeddata", scheduleProgressUpdate);
+            video.addEventListener("canplay", scheduleProgressUpdate);
+            video.addEventListener("progress", scheduleProgressUpdate);
 
             progress.addEventListener("input", () => {
                 const range = getSeekableRange();
@@ -1653,7 +1642,7 @@ async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
 
             // Nút TẢI APP: mở đúng trang download ở tab mới
             downloadAppBtn.addEventListener("click", () => {
-                window.open("https://thanhthovn.github.io/updown/", "_blank", "noopener,noreferrer");
+                window.open(DOWNLOAD_APP_URL, "_blank", "noopener,noreferrer");
             });
 
             // =========================================================
