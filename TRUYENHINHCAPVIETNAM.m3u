@@ -418,8 +418,8 @@ https://cdn.inteltelevision.com/4987/cctv8hd/playlist.m3u8?t=1779156466&token=50
 https://live05.meung.app/live/33982309.m3u8?_t=1788178685662
 
 #EXTINF:-1 tvg-id="" group-title="🔴LIVE⚽" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/live.png", 🔴LIVE⚽ 2️⃣
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57
-https://1w4o2c.m6q94qkrbmfq.net:8443/hls/ithh1xe7c01n2.m3u8?s=YvjnH6VUMPowMWuBpouLTA&e=1787664582
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 
+https://live2.streamhaulcdn.com/livecdn/channel-15.m3u8?auth_key=3000001788180155-0-0-9cd99391e7718eb8e1ff4bb9260da304
 
 #EXTINF:-1 tvg-id="" group-title="🔴LIVE⚽" tvg-logo="https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/logo/live.png", 🔴LIVE⚽ 3️⃣
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.57
