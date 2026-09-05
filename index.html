@@ -1,1706 +1,1844 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>M3U8 Test Player</title>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XEM TIVI Ở NHÀ</title>
+    
+    <link rel="apple-touch-icon" href="icon-180.png">
 
-<style>
-:root{
-  --bg:#050805;
-  --panel:#0a110a;
-  --panel2:#050905;
-  --border:#173817;
-  --text:#b7ffb7;
-  --muted:#5f9b5f;
-  --accent:#20e020;
-  --accent2:#13b913;
-  --danger:#ef4444;
-  --ok:#20e020;
-}
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="XEM TIVI Ở NHÀ">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-*{box-sizing:border-box}
+    <style>
+        :root {
+            --logo-size: 250px;
+            --channel-name-size: 30px;
+            --grid-gap: 15px;
+            --military-black: #0b1009;
+            --military-dark: #11180e;
+            --military-green: #263b20;
+            --military-green-2: #344d28;
+            --military-light: #536a3c;
+            --military-border: #465838;
+            --accent: #82964c;
+            --text-main: #f0f2e9;
+            --text-muted: #a8b19b;
+        }
 
-body{
-  margin:0;
-  min-height:100vh;
-  background:#030603;
-  color:#b7ffb7;
-  font-family:Arial,Helvetica,sans-serif;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.app{
-  width:min(1180px,100%);
-  margin:auto;
-  padding:22px;
-}
+        html {
+            scroll-behavior: smooth;
+        }
 
-header{
-  margin-bottom:18px;
-}
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            font-family: sans-serif, Arial, Helvetica;
+            color: var(--text-main);
+            background: var(--military-black);
+        }
 
-h1{
-  margin:0;
-  font-size:23px;
-  color:#45ff45;
-  letter-spacing:1px;
-  text-shadow:0 0 8px rgba(32,224,32,.28);
-}
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 15% 20%, rgba(83,106,60,.42) 0 10%, transparent 32%),
+                radial-gradient(ellipse at 80% 15%, rgba(52,77,40,.50) 0 12%, transparent 35%),
+                radial-gradient(ellipse at 60% 70%, rgba(104,115,74,.24) 0 11%, transparent 34%),
+                radial-gradient(ellipse at 20% 85%, rgba(38,59,32,.60) 0 15%, transparent 40%),
+                linear-gradient(135deg, #0b1009, #1c2817 35%, #11180e 70%, #28381f);
+        }
 
-.subtitle{
-  margin-top:6px;
-  color:var(--muted);
-  font-size:13px;
-}
+        .container {
+            width: 100%;
+            max-width: 1700px;
+            margin: auto;
+            padding: 18px;
+        }
 
-.card{
-  background:#081008;
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:14px;
-  margin-bottom:14px;
-}
+        .layout {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
 
-.player{
-  background:#000;
-  border-radius:11px;
-  overflow:hidden;
-  aspect-ratio:16/9;
-}
+        .player-wrapper {
+            width: 100%;
+            order: 1;
+        }
 
-video{
-  display:block;
-  width:100%;
-  height:100%;
-  background:#000;
-}
+        .player {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 9px;
+            overflow: hidden;
+            border: 2px solid var(--military-border);
+            box-shadow: 0 8px 25px rgba(0,0,0,.5);
+        }
 
-.status{
-  margin-top:12px;
-  padding:10px 12px;
-  border-radius:8px;
-  background:var(--panel2);
-  color:var(--muted);
-  font-size:13px;
-}
+        .player:fullscreen,
+        .player:-webkit-full-screen,
+        .player:-moz-full-screen,
+        .player:-ms-fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            max-height: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            background: #000 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
 
-.status.ok{color:#86efac}
-.status.error{color:#fca5a5}
+        video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #000;
+            object-fit: contain;
+        }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-}
+        .player-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f87171;
+            font-size: 16px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 2;
+            background: rgba(0,0,0,0.7);
+            text-align: center;
+            padding: 20px;
+        }
 
-label{
-  display:block;
-  margin-bottom:7px;
-  color:var(--muted);
-  font-size:13px;
-  font-weight:700;
-}
+        .player-overlay.hidden {
+            display: none;
+        }
+        #programTitle {
+            font-weight: normal;
+            color: red;
+            font-size: 0.75em;
+            line-height: 1.2;
+            text-align: right;
+            -webkit-text-stroke: 0.25px gold;
+        }
 
-select,input{
-  width:100%;
-  padding:11px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  outline:none;
-  background:#050905;
-  color:var(--text);
-  font-size:14px;
-}
+.player-title {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            z-index: 15;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity .25s ease, transform .25s ease;
+            pointer-events: none;
+        }
 
-select:focus,input:focus{
-  border-color:var(--accent);
-}
+        .player-title.title-hidden {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
 
-.url-row{
-  display:flex;
-  gap:8px;
-}
+        .unmute-banner {
+            position: absolute !important;
+            top: 12px !important;
+            left: 12px !important;
+            right: auto !important;
+            bottom: auto !important;
+            z-index: 100 !important;
+            background: rgba(220, 38, 38, 0.94);
+            color: #fff;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,.35);
+            white-space: nowrap;
+        }
 
-.url-row input{
-  font-family:Consolas,monospace;
-  font-size:12px;
-}
+.unmute-banner.hidden {
+            display: none;
+        }
 
-.actions{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:10px;
-}
+        .video-controls {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 20;
+            padding: 10px 12px 11px;
+            background: linear-gradient(to top, rgba(5,8,4,.98), rgba(5,8,4,.88), transparent);
+            transition: opacity .25s ease, transform .25s ease;
+        }
 
-button{
-  border:1px solid #25d925;
-  border-radius:7px;
-  padding:10px 14px;
-  background:#0b240b;
-  color:#7dff7d;
-  font-weight:700;
-  cursor:pointer;
-  text-transform:uppercase;
-}
+        .video-controls.controls-hidden {
+            opacity: 0;
+            transform: translateY(100%);
+            pointer-events: none;
+        }
 
-button:hover{
-  background:#123812;
-  color:#b7ffb7;
-  box-shadow:0 0 8px rgba(32,224,32,.18);
-}
+        .player.controls-active .video-controls {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
 
-button:disabled{
-  opacity:.65;
-  cursor:wait;
-  box-shadow:none;
-}
+        .progress-row {
+            width: 100%;
+            margin-bottom: -95px;
+        }
 
-button.secondary{
-  background:#0b1a0b;
-  color:#8cff8c;
-  border:1px solid #1c4d1c;
-}
+        .progress-time-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
 
-button.secondary:hover{
-  background:#102410;
-  color:#b7ffb7;
-}
+        .progress-time {
+            flex: 0 0 auto;
+            min-width: 42px;
+            color: #ffffff;
+            font-size: 11px;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(0,0,0,.8);
+        }
 
-button.danger{
-  background:var(--danger);
-}
+        .progress {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: auto;
+            height: 6px;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            background: linear-gradient(to right, #ef4444 0%, #ef4444 0%, #30382b 0%, #30382b 100%);
+            border-radius: 10px;
+            outline: none;
+        }
 
-button.danger:hover{
-  background:#dc2626;
-}
+        .progress.live-only {
+            cursor: default;
+            opacity: .85;
+        }
 
-.counter{
-  margin-top:9px;
-  color:var(--muted);
-  font-size:12px;
-}
+        .progress::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #263b20;
+            border: 2px solid #536a3c;
+            cursor: pointer;
+        }
 
-.quality-box{
-  margin-top:10px;
-  padding:10px 12px;
-  border:1px solid #4a1515;
-  border-radius:8px;
-  background:#120707;
-  color:#ff3b3b;
-  font-size:13px;
-  font-weight:700;
-}
+        .progress::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #536a3c;
+            border-radius: 50%;
+            background: #263b20;
+            cursor: pointer;
+        }
 
-.quality-box span{
-  color:#ff3b3b;
-}
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
 
-@media(max-width:760px){
-  .app{padding:12px}
-  .grid{grid-template-columns:1fr}
-  .url-row{flex-direction:column}
-  h1{font-size:22px}
-}
+        .standalone-logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            padding: 4px;
+            display: none;
+            flex-shrink: 0;
+        }
 
-.scan-panel{
-  overflow:hidden;
-}
-.panel-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:0;
-}
-.panel-head label{
-  margin:0;
-}
-.panel-toggle{
-  padding:7px 11px;
-  font-size:11px;
-  text-transform:uppercase;
-  white-space:nowrap;
-}
-.panel-body{
-  margin-top:12px;
-}
-.panel-body.is-hidden{
-  display:none;
-}
+        .control-btn {
+            width: 40px;
+            height: 36px;
+            flex-shrink: 0;
+            border: 1px solid rgba(126,148,82,.45);
+            border-radius: 6px;
+            background: rgba(38,59,32,.92);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 17px;
+            transition: background .15s, transform .15s;
+        }
 
-</style>
+        .control-btn:hover {
+            background: var(--military-light);
+        }
+
+        .control-btn:active {
+            transform: scale(.94);
+        }
+
+        .play-btn {
+            width: 44px;
+            font-size: 19px;
+            background: #a51f1f;
+            border-color: #d13a3a;
+        }
+
+        .play-btn:hover {
+            background: #c52b2b;
+            border-color: #e14a4a;
+        }
+
+        .current-channel-btn {
+            color: #82c341;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .current-channel-btn:hover {
+            color: #a6e063;
+        }
+
+        .control-spacer {
+            flex: 1;
+        }
+
+        .panel {
+            width: 100%;
+            order: 2;
+            background: rgba(17,24,14,.96);
+            border: 2px solid var(--military-border);
+            border-radius: 9px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,.35);
+        }
+
+        .panel-header {
+            padding: 13px 15px;
+            background: linear-gradient(135deg, #263b20, #11180e);
+            border-bottom: 1px solid var(--military-border);
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            gap: 10px;
+        }
+
+        .panel-title h2 {
+            flex-shrink: 0;
+            white-space: nowrap;
+            font-size: 15px;
+        }
+        .channel-group-filter {
+            width: 300px;
+            min-width: 60px;
+            max-width: 300px;
+            height: 34px;
+            padding: 0 6px;
+            border: 1px solid #d13a3a;
+            border-radius: 6px;
+            background: #182314;
+            color: var(--text-main);
+            font-family: sans-serif, Arial, Helvetica;
+            font-size: 18px;
+            outline: none;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .channel-group-filter:hover,
+        .channel-group-filter:focus {
+            border-color: var(--military-light);
+        }
+
+        .channel-group-filter option {
+            background: #182314;
+            color: var(--text-main);
+        }
+
+        .calendar-btn,
+        .cinemax-btn {
+            height: 34px;
+            padding: 0 14px;
+            border: 1px solid #d13a3a;
+            border-radius: 6px;
+            background: #11180e;
+            color: #ffffff;
+            font-family: sans-serif, Arial, Helvetica;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: background .15s, transform .15s, border-color .15s;
+        }
+
+        .calendar-btn:hover,
+        .cinemax-btn:hover {
+            background: #c52b2b;
+            border-color: #ef4444;
+        }
+
+        .calendar-btn:active,
+        .cinemax-btn:active {
+            transform: scale(.96);
+        }
+        .channel-count {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+            margin-left: auto;
+            white-space: nowrap;
+            height: 34px;
+            padding: 0 14px;
+            border: 1px solid #d13a3a;
+            border-radius: 6px;
+            background: #11180e;
+            cursor: pointer;
+            transition: background .15s, transform .15s, border-color .15s;
+        }
+
+        .channel-count:hover {
+            background: #c52b2b;
+            border-color: #ef4444;
+        }
+
+        .channel-count:active {
+            transform: scale(.96);
+        }
+
+        .channel-count:focus-visible {
+            outline: 2px solid #ef4444;
+            outline-offset: 2px;
+        }
+
+        .channel-count:disabled {
+            opacity: .65;
+            cursor: wait;
+        }
+
+        .channel-count.import-btn:hover,
+
+        .temp-m3u-action.load:hover {
+            background: #991b1b;
+        }
+
+        .channel-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: var(--grid-gap);
+            padding: 16px;
+        }
+
+        .channel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            min-height: 220px;
+            padding: 16px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background .15s ease, transform .15s ease, border-color .15s ease;
+            border: 2px solid transparent;
+        }
+
+        .channel:hover {
+            background: rgba(83,106,60,.35);
+            border-color: var(--military-light);
+            transform: translateY(-2px);
+        }
+
+        .channel.active {
+            background: linear-gradient(135deg, #7f1d1d, #450a0a) !important;
+            border: 2px solid #ef4444 !important;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .channel-logo {
+            width: var(--logo-size);
+            height: var(--logo-size);
+            min-width: var(--logo-size);
+            min-height: var(--logo-size);
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: #20291b;
+            border: 1px solid #52633d;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,.4);
+        }
+
+        .channel-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 8px;
+            display: block;
+        }
+
+        .logo-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+        }
+
+        .channel-info {
+            width: 100%;
+            min-width: 0;
+            text-align: center;
+        }
+
+        .channel-name {
+            font-size: var(--channel-name-size);
+            font-weight: 700;
+            line-height: 1.2;
+            text-align: center;
+            overflow-wrap: anywhere;
+        }
+
+        .empty, .loading {
+            padding: 30px 10px;
+            text-align: center;
+            color: #77826d;
+            font-size: 12px;
+            grid-column: 1 / -1;
+        }
+
+
+        /* =========================================================
+           HỘP NHẬP LINK M3U / M3U8
+           ========================================================= */
+        .playlist-choice-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(4px);
+        }
+
+        .playlist-choice-box {
+            width: min(520px, 100%);
+            padding: 20px;
+            border: 2px solid var(--military-border);
+            border-radius: 12px;
+            background: linear-gradient(145deg, #182314, #0b1009);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.65);
+        }
+
+        .playlist-choice-title {
+            margin-bottom: 18px;
+            color: #ffffff;
+            font-size: 19px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .playlist-choice-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .playlist-choice-label {
+            grid-column: 1 / -1;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .playlist-choice-input {
+            width: 100%;
+            min-width: 0;
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid #d13a3a;
+            border-radius: 6px;
+            outline: none;
+            background: #11180e;
+            color: #ffffff;
+            font-family: sans-serif, Arial, Helvetica;
+            font-size: 14px;
+        }
+
+        .playlist-choice-input::placeholder {
+            color: #77826d;
+        }
+
+        .playlist-choice-input:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+        }
+
+        .playlist-choice-ok {
+            width: 70px;
+            height: 42px;
+            border: 1px solid #d13a3a;
+            border-radius: 6px;
+            background: #a51f1f;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .playlist-choice-ok:hover {
+            background: #c52b2b;
+            border-color: #ef4444;
+        }
+
+        .playlist-choice-ok:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
+
+        .playlist-choice-cancel {
+            width: 100%;
+            height: 38px;
+            margin-top: 4px;
+            border: 1px solid var(--military-border);
+            border-radius: 6px;
+            background: #263b20;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .playlist-choice-cancel:hover {
+            background: #536a3c;
+        }
+
+        @media (max-width: 600px) {
+            .unmute-banner {
+                top: 8px !important;
+                left: 8px !important;
+                right: auto !important;
+                bottom: auto !important;
+                font-size: 12px;
+                padding: 7px 10px;
+            }
+.container { padding: 9px; }
+            .channel-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+                padding: 8px;
+            }
+            .channel { min-height: 180px; padding: 10px 5px; }
+            .channel-logo {
+                width: 110px; height: 110px;
+                min-width: 110px; min-height: 110px;
+            }
+            .channel-name { font-size: 18px; }
+            .control-btn { width: 35px; height: 34px; }
+            .standalone-logo { width: 50px; height: 50px; }
+
+        @media (max-width: 520px) {
+            .panel-title {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .panel-title h2 {
+                font-size: 13px;
+            }
+
+            .channel-group-filter {
+                width: min(100%, 100%);
+                min-width: 0;
+                max-width: 100%;
+                font-size: 11px;
+                flex: 1 1 100%;
+            }
+
+            .channel-count { font-size: 11px; padding: 0 10px; }
+        }
+    </style>
 </head>
 
 <body>
-<div class="app">
+    <main class="container">
+        <div class="layout">
+            <section class="player-wrapper">
+                <div id="player" class="player">
+                    <video id="video" playsinline preload="metadata"></video>
 
-<header>
-  <h1>⌨ M3U8 // TEST CONSOLE</h1>
-  <div class="subtitle">
-    [ SYSTEM READY ] Chọn kênh → chọn link → phát M3U8
-  </div>
-</header>
-
-<!-- PLAYER -->
-<div class="card">
-  <div class="player">
-    <video id="video" controls playsinline></video>
-  </div>
-
-  <div id="status" class="status">
-    ⚪ Chưa phát stream
-  </div>
+                    <div id="playerTitle" class="player-title">
+                        
+                    
+                <div id="programTitle">Thánh Thơ © 2026</div></div>
+<div id="playerOverlay" class="player-overlay">
+                        Đang tải danh sách kênh.....
+                    </div>
 
 
-</div>
+                    <div id="unmuteBanner" class="unmute-banner hidden">
+                        🔊 [BẬT ÂM THANH]
+                    </div>
+<div class="video-controls">
+                        <div class="progress-row">
+                            <div class="progress-time-row">
+                                <span id="currentTime" class="progress-time">00:00</span>
+                                <input id="progress" class="progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="Tiến trình phát">
+                                <span id="durationTime" class="progress-time">00:00</span>
+                            </div>
+                        </div>
 
-<!-- CHỌN KÊNH / LINK -->
-<div class="card scan-panel" id="channelPanel">
-  <div class="panel-head">
-    <label>▸ CHỌN KÊNH / LINK</label>
-    <button class="secondary panel-toggle" type="button"
-            onclick="togglePanel('channelBody','channelToggle')">
-      <span id="channelToggle">▲ ẨN</span>
-    </button>
-  </div>
+                        <div class="control-row">
+                            <img id="activeChannelLogo" class="standalone-logo" src="" alt="Logo">
+                            <button id="previousBtn" class="control-btn" type="button" title="Kênh trước">⏮</button>
+                            <button id="playBtn" class="control-btn play-btn" type="button" title="Phát / Tạm dừng">▶</button>
+                            <button id="nextBtn" class="control-btn" type="button" title="Kênh tiếp theo">⏭</button>
+                            <button id="currentChannelBtn" class="control-btn current-channel-btn" type="button" title="Đến kênh đang phát">▼</button>                            <div class="control-spacer"></div>
+                            <button id="fullscreenBtn" class="control-btn" type="button" title="Toàn màn hình">⛶</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-  <div class="panel-body" id="channelBody">
-    <div class="grid">
+            <aside class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <select id="channelGroupFilter" class="channel-group-filter" title="Chọn nhóm kênh">
+                            <option value="__ALL__">Tất cả các kênh</option>
+                        </select>
 
-      <div>
-        <label>▸ NHẬP TÊN KÊNH THỦ CÔNG</label>
-        <div class="url-row">
-          <input id="manualChannelInput" type="text"
-                 placeholder="Ví dụ: vtv1" autocomplete="off">
-          <button class="secondary" onclick="useManualChannel()">DÙNG KÊNH</button>
-          <button class="danger" onclick="clearManualChannel()">XÓA KÊNH</button>
+                        <button id="calendarBtn" class="calendar-btn" type="button" title="XEM LỊCH ÂM">
+                           📅
+                        </button>
+
+                        <button id="cinemaxBtn" class="cinemax-btn" type="button" title="IPTV SCANNING CHANNEL">
+                           🔗
+                        </button>
+
+                        <button id="downloadAppBtn" class="cinemax-btn download-app-btn" type="button" title="TẢI ỨNG DỤNG">
+                           🧩
+                        </button>
+
+                        <button id="channelCount" class="channel-count" type="button" title="Đọc M3U hoặc xem trực tiếp M3U8">0 KÊNH</button>
+                    </div>
+                </div><div id="channelList" class="channel-list">
+                    <div class="loading">⏳ Đang tải danh sách kênh.....</div>
+                </div>
+            </aside>
         </div>
-
-        <div class="counter">
-          Kênh nhập thủ công chỉ dùng trong lần này — không lưu lại sau khi F5.
-        </div>
-
-        <div class="actions">
-          <button class="danger" onclick="stopPlayer()">■ STOP</button>
-          <button id="autoScanBtn" onclick="autoScanLinks()">⚡ DÒ TỰ ĐỘNG</button>
-          <button class="secondary" onclick="resetAutoScan()">↻ DÒ LẠI TỪ ĐẦU</button>
-        </div>
-
-        <label style="margin-top:12px">▸ CHANNEL</label>
-        <select id="channelSelect"></select>
-
-        <div class="actions">
-          <button class="secondary" onclick="prevChannel()">⬅ KÊNH TRƯỚC</button>
-          <button class="secondary" onclick="nextChannel()">KÊNH SAU ➡</button>
-        </div>
-
-        <div id="channelCounter" class="counter"></div>
-      </div>
-
-      <div>
-        <label>▸ STREAM SOURCE</label>
-        <select id="templateSelect"></select>
-        <div id="linkCounter" class="counter"></div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- DÒ KÊNH FREEM3U -->
-<div class="card scan-panel" id="vidScanPanel">
-  <div class="panel-head">
-    <label>▸ FREEM3U // DÒ KÊNH THEO SỐ</label>
-    <button class="secondary panel-toggle" type="button" onclick="togglePanel('vidScanBody','vidScanToggle')">
-      <span id="vidScanToggle">▲ ẨN</span>
-    </button>
-  </div>
-
- 
-
-  <div class="grid" style="margin-top:10px;">
-    <div>
-      <label>SỐ ĐANG DÒ</label>
-      <input id="vidCurrent" value="1" readonly>
-    </div>
-
-    
-
-  <div class="actions">
-    <button id="vidScanBtn" onclick="startVidScan()">🔎 DÒ TỚI</button>
-    <button class="secondary" onclick="scanBackward()">◀️ DÒ LÙI</button>
-    <button class="secondary" onclick="resetVidScan()">↺ DÒ LẠI TỪ ĐẦU</button>
-    <button class="danger" onclick="stopVidScan()">■ DỪNG DÒ</button>
-  </div>
-
-  <div id="vidScanStatus" class="counter">
-    ⚪ Sẵn sàng — DÒ TỚI dò tăng số; DÒ LÙI lấy SỐ ĐANG DÒ làm mốc và lùi xuống; DÒ LẠI TỪ ĐẦU reset về 1.
-  </div>
-  </div>
-</div>
-
-<!-- URL -->
-<div class="card">
-  <label>▸ STREAM URL</label>
-
-  <div class="url-row">
-    <input id="urlBox" readonly>
-    <button onclick="copyUrl()">COPY</button>
-  </div>
-
-  <div id="qualityBox" class="quality-box">
-    📺 CHẤT LƯỢNG: <span id="qualityText">Chưa dò kênh</span>
-  </div>
-</div>
-
-</div>
-
-<script>
-/* =========================================================
-   DANH SÁCH KÊNH
-   Chỉ cần thêm mã vào đây khi muốn thêm kênh.
-========================================================= */
-
-const channels = [
-  "antv",
-  "anninhtv",
-  "ANNINHTV",
-  "film360",
-  "nghean",
-  "nghe-an",
-  "nghean01",
-  "laichau",
-  "laichautv",
-  "laichau01",
-  "bacninh01"
-];
-
-/* =========================================================
-   CÁC MẪU LINK
-   Danh sách link thực tế; {code} sẽ được thay bằng mã kênh.
-   {code} sẽ được thay bằng mã kênh.
-========================================================= */
-
-const templates = [
-
-  {
-    name:"Link 1 — Live247 AVC 4M",
-    url:"https://live-a.fptplay53.net/live/media/{code}/live247-hls-avc/{code}-avc1_4000000=10000-mp4a_131600=20000.m3u8"
-  },
-
-  {
-    name:"Link 2 — Live247 AVC 5.6M",
-    url:"https://live-a.fptplay53.net/live/media/{code}/live247-hls-avc/{code}-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-  },
-
-  {
-    name:"Link 3 — Live HLS AVC 5.6M",
-    url:"https://vips-livecdn.fptplay.net/live/media/{code}/live-hls-avc/{code}-avc1_5600000=10000-mp4a_131600=20000.m3u8"
-  },
-
-  {
-    name:"Link 4 — Live HLS AVC 4M",
-    url:"https://vips-livecdn.fptplay.net/live/media/{code}/live-hls-avc/{code}-avc1_4000000=10000-mp4a_131600=20000.m3u8"
-  },
-
-  {
-    name:"Link 6 — Live HLS AVC INDEX",
-    url:"https://vips-livecdn.fptplay.net/live/media/{code}/live-hls-avc/index.m3u8"
-  },
-
-  {
-    name:"Link 5 — EPZ SD1 2.5M",
-    url:"https://live.fptplay53.net/epzsd1/{code}_vhls.smil/chunklist_b2500000.m3u8"
-  },
-
-  {
-    name:"Link 7 — EPZ SD2 2.5M",
-    url:"https://live.fptplay53.net/epzsd2/{code}_vhls.smil/chunklist_b2500000.m3u8"
-  },
-
-  {
-    name:"Link 8 — EPZ SD1",
-    url:"https://live.fptplay53.net/epzsd1/{code}_hls.smil/chunklist.m3u8"
-  },
-
-  {
-    name:"Link 9 — EPZ SD2",
-    url:"https://live.fptplay53.net/epzsd2/{code}_vhls.smil/chunklist.m3u8"
-  },
-
-  {
-    name:"Link 10 — EPZ SD1 5M",
-    url:"https://live.fptplay53.net/epzsd1/{code}_vhls.smil/chunklist_b5000000.m3u8"
-  },
-
-  {
-    name:"Link 11 — EPZ SD2 5M",
-    url:"https://live.fptplay53.net/epzsd2/{code}_vhls.smil/chunklist_b5000000.m3u8"
-  },
-
-  {
-    name:"Link 12 — EPZ HD1 2.5M",
-    url:"https://live.fptplay53.net/epzhd1/{code}_vhls.smil/chunklist_b2500000.m3u8"
-  },
-
-  {
-    name:"Link 13 — EPZ HD2 2.5M",
-    url:"https://live.fptplay53.net/epzhd2/{code}_vhls.smil/chunklist_b2500000.m3u8"
-  },
-
-  {
-    name:"Link 14 — EPZ HD1",
-    url:"https://live.fptplay53.net/epzhd1/{code}_vhls.smil/chunklist.m3u8"
-  },
-
-  {
-    name:"Link 15 — EPZ HD2",
-    url:"https://live.fptplay53.net/epzhd2/{code}_vhls.smil/chunklist.m3u8"
-  },
-
-  {
-    name:"Link 16 — EPZ HD1 5M",
-    url:"https://live.fptplay53.net/epzhd1/{code}_vhls.smil/chunklist_b5000000.m3u8"
-  },
-
-  {
-    name:"Link 17 — EPZ HD2 5M",
-    url:"https://live.fptplay53.net/epzhd2/{code}_vhls.smil/chunklist_b5000000.m3u8"
-  },
-
-  {
-    name:"Link 18 — FNX SD1 2.5M",
-    url:"https://live.fptplay53.net/fnxsd1/{code}_hls.smil/chunklist_b2500000.m3u8"
-  },
-
-  {
-    name:"Link 19 — FNX SD2 2.5M",
-    url:"https://live.fptplay53.net/fnxsd2/{code}_hls.smil/chunklist_b2500000.m3u8"
-  },
-
-  {
-    name:"Link 20 — FNX SD1",
-    url:"https://live.fptplay53.net/fnxsd1/{code}_hls.smil/chunklist.m3u8"
-  },
-
-  {
-    name:"Link 21 — FNX SD2",
-    url:"https://live.fptplay53.net/fnxsd2/{code}_hls.smil/chunklist.m3u8"
-  },
-
-  {
-    name:"Link 22 — FNX SD1 5M",
-    url:"https://live.fptplay53.net/fnxsd1/{code}_hls.smil/chunklist_b5000000.m3u8"
-  },
-
-  {
-    name:"Link 23 — FNX SD2 5M",
-    url:"https://live.fptplay53.net/fnxsd2/{code}_hls.smil/chunklist_b5000000.m3u8"
-  },
-
-  {
-    name:"Link 24 — FNX HD1 2.5M",
-    url:"https://live.fptplay53.net/fnxhd1/{code}_vhls.smil/chunklist_b2500000.m3u8"
-  },
-
-  {
-    name:"Link 25 — FNX HD2 2.5M",
-    url:"https://live.fptplay53.net/fnxhd2/{code}_vhls.smil/chunklist_b2500000.m3u8"
-  },
-
-  {
-    name:"Link 26 — FNX HD1",
-    url:"https://live.fptplay53.net/fnxhd1/{code}_hls.smil/chunklist.m3u8"
-  },
-
-  {
-    name:"Link 27 — FNX HD2",
-    url:"https://live.fptplay53.net/fnxhd2/{code}_hls.smil/chunklist.m3u8"
-  },
-
-  {
-    name:"Link 28 — FNX HD1 5M",
-    url:"https://live.fptplay53.net/fnxhd1/{code}_vhls.smil/chunklist_b5000000.m3u8"
-  },
-
-  {
-    name:"Link 29 — FNX HD2 5M",
-    url:"https://live.fptplay53.net/fnxhd2/{code}_vhls.smil/chunklist_b5000000.m3u8"
-  }
-
-];
-
-/* =========================================================
-   BIẾN
-========================================================= */
-
-let hls = null;
-let currentPlayingLink = 0;
-let autoScanning = false;
-let autoScanToken = 0;
-let autoScanNextIndex = 0;
-
-/* FREEM3U numeric scanner */
-let vidScanning = false;
-let vidScanToken = 0;
-let vidScanNumber = 1;
-let freem3uPlaying = false;
-let freem3uPlayingNumber = null;
-let vidFoundNumbers = [];
-const VID_SCAN_MAX = 999;
-const VID_SCAN_TIMEOUT = 6000;
-
-const video = document.getElementById("video");
-const channelSelect = document.getElementById("channelSelect");
-const templateSelect = document.getElementById("templateSelect");
-const urlBox = document.getElementById("urlBox");
-const statusBox = document.getElementById("status");
-const channelCounter = document.getElementById("channelCounter");
-const linkCounter = document.getElementById("linkCounter");
-const qualityText = document.getElementById("qualityText");
-
-const vidCurrent = document.getElementById("vidCurrent");
-const vidFound = document.getElementById("vidFound");
-const vidScanStatus = document.getElementById("vidScanStatus");
-const vidScanBtn = document.getElementById("vidScanBtn");
-
-/* =========================================================
-   KHỞI TẠO DROPDOWN
-========================================================= */
-
-channels.forEach(code => {
-  const option = document.createElement("option");
-  option.value = code;
-  option.textContent = code;
-  channelSelect.appendChild(option);
-});
-
-templates.forEach((template,index) => {
-  const option = document.createElement("option");
-  option.value = index;
-  option.textContent = template.name;
-  templateSelect.appendChild(option);
-});
-
-/* Mặc định */
-channelSelect.value = "nghean01";
-templateSelect.value = "0";
-
-/* =========================================================
-   KÊNH NHẬP THỦ CÔNG
-   Không dùng localStorage/sessionStorage:
-   - Chỉ có hiệu lực trong lần sử dụng hiện tại.
-   - F5 tải lại trang sẽ mất tên kênh thủ công.
-========================================================= */
-
-let manualChannelCode = "";
-
-function getActiveChannelCode() {
-  return manualChannelCode.trim() || channelSelect.value;
-}
-
-function useManualChannel() {
-  stopVidScan();
-  const input = document.getElementById("manualChannelInput");
-  const code = input.value.trim();
-
-  if(!code) {
-    manualChannelCode = "";
-    updateUrl();
-    setStatus("⚪ Chưa nhập tên kênh thủ công");
-    return;
-  }
-
-  manualChannelCode = code;
-
-  // Nhập kênh mới -> reset dò về Link 1.
-  autoScanToken++;
-  autoScanning = false;
-  autoScanNextIndex = 0;
-  setAutoScanButton(false);
-
-  templateSelect.selectedIndex = 0;
-  updateUrl();
-  playCurrent();
-}
-
-function clearManualChannel() {
-  stopVidScan();
-  manualChannelCode = "";
-
-  const input = document.getElementById("manualChannelInput");
-  if(input) input.value = "";
-
-  // Quay lại kênh đang được chọn trong danh sách.
-  autoScanToken++;
-  autoScanning = false;
-  autoScanNextIndex = 0;
-  setAutoScanButton(false);
-
-  updateUrl();
-  playCurrent();
-
-  setStatus(
-    "🟢 Đã xóa kênh nhập tay — đang dùng kênh trong danh sách",
-    "ok"
-  );
-}
-
-document.getElementById("manualChannelInput").addEventListener(
-  "keydown",
-  function(event) {
-    if(event.key === "Enter") {
-      event.preventDefault();
-      useManualChannel();
-    }
-  }
-);
-
-function getUrl(index = Number(templateSelect.value)) {
-
-  return templates[index].url.replaceAll(
-    "{code}",
-    getActiveChannelCode()
-  );
-
-}
-
-/* =========================================================
-   CẬP NHẬT GIAO DIỆN
-========================================================= */
-
-function getQualityLabel(index) {
-  const name = templates[index]?.name || "";
-
-  if(/5\.6M/i.test(name)) return "🔥 5.6 Mbps — RẤT CAO";
-  if(/5M/i.test(name)) return "🔥 5 Mbps — CAO";
-  if(/4M/i.test(name)) return "🟢 4 Mbps — CAO";
-  if(/2\.5M/i.test(name)) return "🟡 2.5 Mbps — KHÁ";
-  if(/HD/i.test(name)) return "📺 HD — KHÁ/CAO";
-  if(/SD/i.test(name)) return "📺 SD — TRUNG BÌNH";
-  if(/INDEX/i.test(name)) return "📡 HLS INDEX — TỰ CHỌN";
-  return "📺 Chưa xác định bitrate";
-}
-
-function showQuality(index, detected=false) {
-  if(!qualityText) return;
-
-  // Chỉ hiện chất lượng khi link đã dò/phát thành công.
-  if(!detected) {
-    qualityText.textContent = "";
-    return;
-  }
-
-  const label = getQualityLabel(index);
-  qualityText.textContent = label;
-}
-
-function updateUrl() {
-
-  urlBox.value = getUrl();
-
-  channelCounter.textContent =
-    "Kênh " +
-    (channelSelect.selectedIndex + 1) +
-    "/" +
-    channels.length;
-
-  linkCounter.textContent =
-    "Link " +
-    (templateSelect.selectedIndex + 1) +
-    "/" +
-    templates.length;
-
-
-
-  showQuality(templateSelect.selectedIndex, false);
-}
-
-/* =========================================================
-   CHUYỂN KÊNH
-========================================================= */
-
-function nextChannel() {
-
-  
-  // Đổi kênh -> reset dò về Link 1.
-  autoScanToken++;
-  autoScanning = false;
-  autoScanNextIndex = 0;
-  setAutoScanButton(false);
-
-let index = channelSelect.selectedIndex + 1;
-
-  if(index >= channels.length) {
-    index = 0;
-  }
-
-  channelSelect.selectedIndex = index;
-
-  // Đổi kênh -> luôn quay về Link 1 và reset dò.
-  templateSelect.selectedIndex = 0;
-  updateUrl();
-  playCurrent();
-
-}
-
-function prevChannel() {
-
-  
-  // Đổi kênh -> reset dò về Link 1.
-  autoScanToken++;
-  autoScanning = false;
-  autoScanNextIndex = 0;
-  setAutoScanButton(false);
-
-let index = channelSelect.selectedIndex - 1;
-
-  if(index < 0) {
-    index = channels.length - 1;
-  }
-
-  channelSelect.selectedIndex = index;
-
-  // Đổi kênh -> luôn quay về Link 1 và reset dò.
-  templateSelect.selectedIndex = 0;
-  updateUrl();
-  playCurrent();
-
-}
-
-/* =========================================================
-   CHUYỂN LINK
-========================================================= */
-
-/* =========================================================
-   EVENT DROPDOWN
-========================================================= */
-
-channelSelect.addEventListener(
-  "change",
-  function(){
-    stopVidScan();
-    // Chọn kênh có sẵn -> thoát chế độ kênh thủ công.
-    manualChannelCode = "";
-    const manualInput = document.getElementById("manualChannelInput");
-    if(manualInput) manualInput.value = "";
-
-    // Đổi kênh -> lần dò mới luôn bắt đầu từ Link 1.
-    autoScanToken++;
-    autoScanning = false;
-    autoScanNextIndex = 0;
-    setAutoScanButton(false);
-
-    // Chọn kênh khác -> quay về Link 1.
-    templateSelect.selectedIndex = 0;
-    updateUrl();
-    playCurrent();
-  }
-);
-
-templateSelect.addEventListener(
-  "change",
-  function(){
-    stopVidScan();
-    updateUrl();
-    playCurrent();
-  }
-);
-
-/* =========================================================
-   ẨN / HIỆN CÁC BẢNG DÒ
-========================================================= */
-
-function togglePanel(bodyId, toggleId) {
-  const body = document.getElementById(bodyId);
-  const toggle = document.getElementById(toggleId);
-
-  if(!body || !toggle) return;
-
-  const hidden = body.classList.toggle("is-hidden");
-  toggle.textContent = hidden ? "▼ HIỆN" : "▲ ẨN";
-}
-
-/* =========================================================
-   TRẠNG THÁI
-========================================================= */
-
-function setStatus(text,type="") {
-
-  statusBox.textContent = text;
-  statusBox.className = "status " + type;
-
-}
-
-/* =========================================================
-   HỦY PLAYER CŨ
-========================================================= */
-
-function destroyPlayer() {
-
-  if(hls) {
-    hls.destroy();
-    hls = null;
-  }
-
-  video.pause();
-  video.removeAttribute("src");
-  video.load();
-
-}
-
-/* =========================================================
-   PHÁT URL
-========================================================= */
-
-function isIOS() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-         (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-}
-
-/* =========================================================
-   PHÁT URL
-   iOS/iPadOS: ưu tiên HLS native của Safari.
-   PC/Android: dùng hls.js khi có MSE.
-========================================================= */
-
-function playUrl(url,index) {
-  freem3uPlaying = false;
-  freem3uPlayingNumber = null;
-  destroyPlayer();
-
-  currentPlayingLink = index;
-
-  setStatus(
-    "⏳ Đang kết nối Link " +
-    (index + 1) +
-    "..."
-  );
-
-  // iPhone/iPad: dùng HLS native trước.
-  if(
-    isIOS() &&
-    video.canPlayType("application/vnd.apple.mpegurl")
-  ) {
-    video.src = url;
-
-    video.addEventListener(
-      "loadedmetadata",
-      function() {
-        setStatus(
-          "🟢 Đang phát — Link " +
-          (index + 1),
-          "ok"
-        );
-        video.play().catch(() => {});
-      },
-      {once:true}
-    );
-
-    return;
-  }
-
-  // Safari/macOS hoặc trình duyệt có HLS native nhưng không phải iOS.
-  // Nếu không phải iOS thì ưu tiên hls.js trên các trình duyệt hỗ trợ MSE.
-  if(window.Hls && Hls.isSupported()) {
-    hls = new Hls({
-      enableWorker:true,
-      lowLatencyMode:true,
-      backBufferLength:30
-    });
-
-    hls.loadSource(url);
-    hls.attachMedia(video);
-
-    hls.on(
-      Hls.Events.MANIFEST_PARSED,
-      function() {
-        setStatus(
-          "🟢 Đang phát — Link " +
-          (index + 1),
-          "ok"
-        );
-
-        video.play().catch(() => {});
-      }
-    );
-
-    hls.on(
-      Hls.Events.ERROR,
-      function(event,data) {
-        console.log("HLS:",data);
-
-        if(data.fatal) {
-          setStatus(
-            "🔴 Không phát được Link " +
-            (index + 1) +
-            " — " +
-            data.details,
-            "error"
-          );
-        }
-      }
-    );
-
-    return;
-  }
-
-  // Native HLS fallback.
-  if(video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = url;
-
-    video.addEventListener(
-      "loadedmetadata",
-      function() {
-        setStatus(
-          "🟢 Đang phát — Link " +
-          (index + 1),
-          "ok"
-        );
-
-        video.play().catch(() => {});
-      },
-      {once:true}
-    );
-
-    return;
-  }
-
-  setStatus(
-    "❌ Trình duyệt không hỗ trợ HLS",
-    "error"
-  );
-}
-
-/* =========================================================
-   DÒ LINK TỰ ĐỘNG
-   - Luôn dò từ Link 1 → Link cuối
-   - Mỗi link chỉ thử đúng 1 lần
-   - Link nào phát được thì dừng ngay
-   - Dò hết mà không có link nào thì dừng
-========================================================= */
-
-function setAutoScanButton(scanning) {
-  const btn = document.getElementById("autoScanBtn");
-  if(!btn) return;
-
-  btn.disabled = scanning;
-  btn.textContent = scanning
-    ? "⏳ ĐANG DÒ..."
-    : "⚡ DÒ TỰ ĐỘNG";
-}
-
-function waitForNextScanStep() {
-  return new Promise(resolve => setTimeout(resolve, 0));
-}
-
-function tryAutoScanLink(index, token) {
-  return new Promise((resolve) => {
-    if(token !== autoScanToken) {
-      resolve(false);
-      return;
-    }
-
-    const url = getUrl(index);
-    let finished = false;
-    let timer = null;
-
-    const finish = (success) => {
-      if(finished) return;
-      finished = true;
-
-      clearTimeout(timer);
-      video.removeEventListener("playing", onPlaying);
-      video.removeEventListener("error", onVideoError);
-      video.removeEventListener("loadedmetadata", onMetadata);
-
-      if(hls && window.Hls) {
-        hls.off(Hls.Events.MANIFEST_PARSED, onManifestParsed);
-        hls.off(Hls.Events.ERROR, onHlsError);
-      }
-
-      resolve(success);
-    };
-
-    const onPlaying = () => finish(true);
-    const onVideoError = () => finish(false);
-
-    const onMetadata = () => {
-      // Native HLS trên iOS: metadata đã tải, thử phát và chờ "playing".
-      video.play().catch(() => {});
-    };
-
-    const onManifestParsed = () => {
-      video.play().catch(() => {});
-    };
-
-    const onHlsError = (event, data) => {
-      if(data && data.fatal) finish(false);
-    };
-
-    destroyPlayer();
-
-    currentPlayingLink = index;
-    templateSelect.selectedIndex = index;
-    updateUrl();
-
-    setStatus(
-      "🔎 Đang dò Link " + (index + 1) + "/" + templates.length + "..."
-    );
-
-    video.addEventListener("playing", onPlaying, {once:true});
-    video.addEventListener("error", onVideoError, {once:true});
-
-    // iOS/iPadOS: native HLS trước.
-    if(
-      isIOS() &&
-      video.canPlayType("application/vnd.apple.mpegurl")
-    ) {
-      video.addEventListener("loadedmetadata", onMetadata, {once:true});
-      video.src = url;
-    }
-    else if(window.Hls && Hls.isSupported()) {
-      hls = new Hls({
-        enableWorker:true,
-        lowLatencyMode:true,
-        backBufferLength:30
-      });
-
-      hls.on(Hls.Events.MANIFEST_PARSED, onManifestParsed);
-      hls.on(Hls.Events.ERROR, onHlsError);
-
-      hls.loadSource(url);
-      hls.attachMedia(video);
-    }
-    else if(video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.addEventListener("loadedmetadata", onMetadata, {once:true});
-      video.src = url;
-    }
-    else {
-      finish(false);
-      return;
-    }
-
-    // iOS đôi khi không phát sinh error khi stream không vào được,
-    // nên vẫn dùng timeout để chuyển sang link tiếp theo.
-    timer = setTimeout(() => finish(false), 10000);
-  });
-}
-
-function autoScanLinks() {
-  if(autoScanning) return;
-
-  // Dò tiếp từ vị trí còn lại.
-  // Ví dụ lần trước tìm thấy Link 6 -> lần bấm sau bắt đầu từ Link 7.
-  if(autoScanNextIndex >= templates.length) {
-    setStatus(
-      "⚪ Đã dò hết tất cả " + templates.length + " link — không còn link để dò",
-      "error"
-    );
-    return;
-  }
-
-  autoScanning = true;
-  autoScanToken++;
-
-  const token = autoScanToken;
-  let index = autoScanNextIndex;
-
-  setAutoScanButton(true);
-
-  function scanNext() {
-    if(token !== autoScanToken || !autoScanning) return;
-
-    if(index >= templates.length) {
-      autoScanNextIndex = templates.length;
-      autoScanning = false;
-      destroyPlayer();
-      setAutoScanButton(false);
-
-      setStatus(
-        "🔴 Đã dò hết " + templates.length + " link — không có thêm link nào phát được",
-        "error"
-      );
-      return;
-    }
-
-    const testIndex = index++;
-
-    // Lưu ngay vị trí kế tiếp để lần bấm sau tiếp tục từ đây.
-    autoScanNextIndex = index;
-
-    tryAutoScanLink(testIndex, token).then(function(success) {
-      if(token !== autoScanToken || !autoScanning) return;
-
-      if(success) {
-        autoScanning = false;
-        templateSelect.selectedIndex = testIndex;
-        updateUrl();
-        showQuality(testIndex, true);
-        setAutoScanButton(false);
-
-        setStatus(
-          "🟢 Tìm thấy link phát được — Link " + (testIndex + 1) +
-          " | Lần dò sau sẽ bắt đầu từ Link " + (testIndex + 2 > templates.length ? "cuối" : testIndex + 2),
-          "ok"
-        );
-        return;
-      }
-
-      // Không phát được -> tiếp tục link kế tiếp ở task mới.
-      setTimeout(scanNext, 0);
-    }).catch(function(error) {
-      console.log("Auto scan:", error);
-
-      if(token !== autoScanToken || !autoScanning) return;
-
-      setTimeout(scanNext, 0);
-    });
-  }
-
-  setTimeout(scanNext, 0);
-}
-
-/* =========================================================
-   DÒ LẠI TỪ ĐẦU
-   Reset con trỏ dò về Link 1.
-========================================================= */
-
-function resetAutoScan() {
-  autoScanToken++;
-  autoScanning = false;
-  autoScanNextIndex = 0;
-
-  setAutoScanButton(false);
-
-  templateSelect.selectedIndex = 0;
-  updateUrl();
-
-  destroyPlayer();
-
-  setStatus(
-    "🔄 Đã reset dò — lần dò tiếp theo bắt đầu từ Link 1",
-    "ok"
-  );
-}
-
-/* =========================================================
-   FREEM3U // DÒ KÊNH THEO SỐ
-   URL cố định:
-   https://freem3u.xyz/api/live/play.m3u8?vid={number}
-
-   Dò tuần tự 1 -> 999.
-   Số nào phát được thật sự thì dừng và hiện số kênh đó.
-========================================================= */
-
-function getVidUrl(number) {
-  return "https://freem3u.xyz/api/live/play.m3u8?vid=" + number;
-}
-
-function setVidScanButton(scanning) {
-  if(!vidScanBtn) return;
-
-  vidScanBtn.disabled = scanning;
-  vidScanBtn.textContent = scanning
-    ? "⏳ ĐANG DÒ SỐ..."
-    : "⚡ DÒ SỐ TỰ ĐỘNG";
-}
-
-function updateVidScanDisplay(number) {
-  vidScanNumber = number;
-  if(vidCurrent) vidCurrent.value = number;
-}
-
-function setVidScanStatus(text, type="") {
-  if(!vidScanStatus) return;
-
-  vidScanStatus.textContent = text;
-  vidScanStatus.style.color =
-    type === "ok" ? "#86efac" :
-    type === "error" ? "#fca5a5" :
-    "";
-}
-
-function tryVidNumber(number, token) {
-  return new Promise((resolve) => {
-    if(token !== vidScanToken || !vidScanning) {
-      resolve(false);
-      return;
-    }
-
-    const url = getVidUrl(number);
-    let finished = false;
-    let timer = null;
-
-    const cleanup = () => {
-      clearTimeout(timer);
-      video.removeEventListener("playing", onPlaying);
-      video.removeEventListener("error", onVideoError);
-      video.removeEventListener("loadedmetadata", onMetadata);
-
-      if(hls && window.Hls) {
-        hls.off(Hls.Events.MANIFEST_PARSED, onManifestParsed);
-        hls.off(Hls.Events.ERROR, onHlsError);
-      }
-    };
-
-    const finish = (success) => {
-      if(finished) return;
-      finished = true;
-      cleanup();
-      resolve(success);
-    };
-
-    const onPlaying = () => finish(true);
-    const onVideoError = () => finish(false);
-
-    const onMetadata = () => {
-      video.play().catch(() => {});
-    };
-
-    const onManifestParsed = () => {
-      video.play().catch(() => {});
-    };
-
-    const onHlsError = (event, data) => {
-      if(data && data.fatal) finish(false);
-    };
-
-    destroyPlayer();
-
-    video.addEventListener("playing", onPlaying, {once:true});
-    video.addEventListener("error", onVideoError, {once:true});
-
-    if(
-      isIOS() &&
-      video.canPlayType("application/vnd.apple.mpegurl")
-    ) {
-      video.addEventListener("loadedmetadata", onMetadata, {once:true});
-      video.src = url;
-    }
-    else if(window.Hls && Hls.isSupported()) {
-      hls = new Hls({
-        enableWorker:true,
-        lowLatencyMode:true,
-        backBufferLength:30
-      });
-
-      hls.on(Hls.Events.MANIFEST_PARSED, onManifestParsed);
-      hls.on(Hls.Events.ERROR, onHlsError);
-
-      hls.loadSource(url);
-      hls.attachMedia(video);
-    }
-    else if(video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.addEventListener("loadedmetadata", onMetadata, {once:true});
-      video.src = url;
-    }
-    else {
-      finish(false);
-      return;
-    }
-
-    // Không để một số lỗi mạng treo việc dò.
-    timer = setTimeout(() => finish(false), VID_SCAN_TIMEOUT);
-  });
-}
-
-function startVidScan() {
-  if(vidScanning) return;
-
-  if(vidScanNumber > VID_SCAN_MAX) {
-    setVidScanStatus(
-      "🟢 Đã dò hết số 1 → " + VID_SCAN_MAX +
-      (vidFoundNumbers.length
-        ? " | Tìm thấy: " + vidFoundNumbers.join(", ")
-        : " | Không tìm thấy kênh.")
-    );
-    return;
-  }
-
-  // Nếu bắt đầu từ số 1 thì đây là một lượt dò mới.
-  if(vidScanNumber === 1) {
-    vidFoundNumbers = [];
-    if(vidFound && vidFoundNumbers.length === 0) {
-    vidFound.value = "Đang dò...";
-  }
-  }
-
-  vidScanning = true;
-  vidScanToken++;
-
-  const token = vidScanToken;
-  setVidScanButton(true);
-
-  if(vidFound) vidFound.value = vidFoundNumbers.length ? vidFoundNumbers.join(", ") : "Đang dò...";
-
-  function scanNext() {
-    if(token !== vidScanToken || !vidScanning) return;
-
-    if(vidScanNumber > VID_SCAN_MAX) {
-      vidScanning = false;
-      setVidScanButton(false);
-      setVidScanStatus(
-        vidFoundNumbers.length
-          ? "🟢 Đã dò hết 1 → " + VID_SCAN_MAX +
-            " | Tìm thấy: " + vidFoundNumbers.join(", ")
-          : "🔴 Đã dò hết số 1 → " + VID_SCAN_MAX + " mà chưa tìm thấy kênh.",
-        vidFoundNumbers.length ? "ok" : "error"
-      );
-      return;
-    }
-
-    const number = vidScanNumber;
-    updateVidScanDisplay(number);
-
-    setVidScanStatus(
-      "🔎 Đang dò kênh số " + number + "/" + VID_SCAN_MAX + "..."
-    );
-
-    tryVidNumber(number, token).then((success) => {
-      if(token !== vidScanToken || !vidScanning) return;
-
-      if(success) {
-        // Tìm thấy tín hiệu: dừng NGAY tại số này để người dùng xem.
-        vidFoundNumbers.push(number);
-        updateVidScanDisplay(number);
-
-        if(vidFound) {
-          vidFound.value = vidFoundNumbers.join(", ");
+    </main>
+
+    <script>
+        const M3U_URL = "https://raw.githubusercontent.com/thanhthovn/iOSPremium/refs/heads/main/TRUYENHINHCAPVIETNAM.m3u";
+
+        // Website xem lịch chương trình
+        // Có thể đổi URL này thành website lịch mà bạn muốn.
+        const CALENDAR_URL = "https://thanhthovn.github.io/amlichvn/";
+        const CINEMAX_URL = "https://thanhthovn.github.io/1ptvsc4n/";
+        const DOWNLOAD_APP_URL = "https://1drv.ms/u/c/e92bb0b868c9b54b/IQDAtiObV-vZTqnq_xy47T4_AVqcoYbF40ZT1Wjkyukx9xY?e=jFlFse";
+
+        let channels = [];
+        let currentChannelIndex = -1;
+        let activeChannelCard = null;
+        let hls = null;
+        let currentPlaylistUrl = M3U_URL;
+
+        // =========================================================
+        // LOW-END MODE
+        // Tối ưu cho máy yếu / trình duyệt yếu:
+        // - Giữ buffer vừa đủ.
+        // - Không giữ nhiều video cũ trong RAM.
+        // - Chỉ cho request phát mới nhất tiếp tục.
+        // =========================================================
+        const LOW_END_HLS_CONFIG = {
+            enableWorker: true,
+            lowLatencyMode: false,
+            manifestLoadingTimeOut: 8000,
+            maxBufferLength: 15,
+            maxMaxBufferLength: 20,
+            backBufferLength: 5,
+            maxBufferHole: 0.5,
+            startFragPrefetch: false,
+            liveSyncDurationCount: 3,
+            liveMaxLatencyDurationCount: 6
+        };
+
+        let playRequestId = 0;
+
+        const player = document.getElementById("player");
+        const video = document.getElementById("video");
+        const playerOverlay = document.getElementById("playerOverlay");
+        const playerTitle = document.getElementById("playerTitle");
+        const programTitle = document.getElementById("programTitle");
+        const unmuteBanner = document.getElementById("unmuteBanner");
+        const channelList = document.getElementById("channelList");
+        const channelCount = document.getElementById("channelCount");
+const channelGroupFilter = document.getElementById("channelGroupFilter");
+        let selectedChannelGroup = "__ALL__";
+        const playBtn = document.getElementById("playBtn");
+        const previousBtn = document.getElementById("previousBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const currentChannelBtn = document.getElementById("currentChannelBtn");
+        const progress = document.getElementById("progress");
+        const currentTimeEl = document.getElementById("currentTime");
+        const durationTimeEl = document.getElementById("durationTime");
+        const fullscreenBtn = document.getElementById("fullscreenBtn");
+        const activeChannelLogo = document.getElementById("activeChannelLogo");
+        const calendarBtn = document.getElementById("calendarBtn");
+        const cinemaxBtn = document.getElementById("cinemaxBtn");
+        const downloadAppBtn = document.getElementById("downloadAppBtn");
+
+        let progressSeekable = false;
+
+        function formatTime(seconds) {
+            if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
+            const total = Math.floor(seconds);
+            const h = Math.floor(total / 3600);
+            const m = Math.floor((total % 3600) / 60);
+            const s = total % 60;
+            if (h > 0) return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+            return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
         }
 
-        urlBox.value = getVidUrl(number);
-        freem3uPlaying = true;
-        freem3uPlayingNumber = number;
-
-        // Đã tìm thấy: dừng lượt hiện tại nhưng nhớ số kế tiếp.
-        // Lần bấm DÒ SỐ TỰ ĐỘNG tiếp theo sẽ dò từ số này.
-        vidScanNumber = number + 1;
-        vidScanning = false;
-        if(vidScanBtn) vidScanBtn.disabled = false;
-
-        setVidScanStatus(
-          "🎯 TÌM THẤY TÍN HIỆU Ở KÊNH #" + number +
-          " — ĐÃ DỪNG. Bấm DÒ SỐ TỰ ĐỘNG để dò tiếp từ #" +
-          vidScanNumber + ".",
-          "ok"
-        );
-
-        setStatus(
-          "🟢 FREEM3U — Tìm thấy kênh " + number +
-          " — đã dừng dò để bạn xem."
-        );
-
-        return;
-      }
-
-      // Không có -> tự tăng số và dò tiếp.
-      vidScanNumber = number + 1;
-      setTimeout(scanNext, 0);
-
-    }).catch((error) => {
-      console.log("FreeM3U scan:", error);
-
-      if(token !== vidScanToken || !vidScanning) return;
-
-      vidScanNumber = number + 1;
-      setTimeout(scanNext, 0);
-    });
-  }
-
-  setTimeout(scanNext, 0);
-}
-
-function continueVidScan() {
-  if(vidScanning) return;
-
-  if(vidScanNumber > VID_SCAN_MAX) {
-    setVidScanStatus(
-      "🟢 Đã dò hết số 1 → " + VID_SCAN_MAX +
-      (vidFoundNumbers.length
-        ? " | Tìm thấy: " + vidFoundNumbers.join(", ")
-        : " | Không tìm thấy kênh.")
-    );
-    return;
-  }
-
-  startVidScan();
-}
-
-function scanBackward() {
-  if(vidScanning) return;
-
-  // DÒ LÙI phải căn cứ đúng vào "SỐ ĐANG DÒ" đang hiển thị.
-  // Ví dụ đang ở #50 thì bấm DÒ LÙI sẽ dò #49, #48, #47...
-  const current = Number(
-    vidCurrent ? vidCurrent.value : vidScanNumber
-  );
-
-  if(!Number.isFinite(current)) {
-    setVidScanStatus("⚪ Không xác định được số hiện tại để dò lùi.", "error");
-    return;
-  }
-
-  const start = current - 1;
-
-  if(start < 1) {
-    setVidScanStatus("⚪ Đang ở số 1 — không còn số nhỏ hơn để dò lùi.");
-    return;
-  }
-
-  vidScanNumber = start;
-  startVidScan();
-}
-
-function stopVidScan() {
-  vidScanToken++;
-  vidScanning = false;
-  freem3uPlaying = false;
-  freem3uPlayingNumber = null;
-  setVidScanButton(false);
-
-  destroyPlayer();
-
-  setVidScanStatus(
-    "⚪ Đã dừng dò tại số " + vidScanNumber + ". Bấm DÒ SỐ TỰ ĐỘNG để tiếp tục."
-  );
-}
-
-function resetVidScan() {
-  vidScanToken++;
-  vidScanning = false;
-  freem3uPlaying = false;
-  freem3uPlayingNumber = null;
-  vidScanNumber = 1;
-  vidFoundNumbers = [];
-  freem3uPlaying = false;
-  freem3uPlayingNumber = null;
-
-  setVidScanButton(false);
-  updateVidScanDisplay(1);
-
-  if(vidFound) vidFound.value = "Chưa dò";
-
-  setVidScanStatus(
-    "🔄 Đã reset — lần dò tiếp theo bắt đầu từ kênh số 1."
-  );
-}
-
-/* =========================================================
-   PHÁT LINK ĐANG CHỌN
-========================================================= */
-
-function playCurrent() {
-
-  const index = Number(
-    templateSelect.value
-  );
-
-  playUrl(
-    getUrl(index),
-    index
-  );
-
-}
-
-function nextLink() {
-  stopVidScan();
-
-  let index = templateSelect.selectedIndex + 1;
-  if(index >= templates.length) index = 0;
-
-  autoScanToken++;
-  autoScanning = false;
-  autoScanNextIndex = index;
-
-  templateSelect.selectedIndex = index;
-  updateUrl();
-  playCurrent();
-}
-
-function prevLink() {
-  stopVidScan();
-
-  let index = templateSelect.selectedIndex - 1;
-  if(index < 0) index = templates.length - 1;
-
-  autoScanToken++;
-  autoScanning = false;
-  autoScanNextIndex = index;
-
-  templateSelect.selectedIndex = index;
-  updateUrl();
-  playCurrent();
-}
-
-/* =========================================================
-   DỪNG
-========================================================= */
-
-function stopPlayer() {
-
-  autoScanToken++;
-  autoScanning = false;
-  setAutoScanButton(false);
-
-  vidScanToken++;
-  vidScanning = false;
-  setVidScanButton(false);
-
-  destroyPlayer();
-
-  setStatus(
-    "⚪ Đã dừng"
-  );
-}
-
-/* =========================================================
-   COPY URL
-========================================================= */
-
-async function copyUrl() {
-
-  const url = urlBox.value;
-
-  try {
-
-    await navigator.clipboard.writeText(url);
-
-    setStatus(
-      "📋 Đã copy link",
-      "ok"
-    );
-
-  }
-
-  catch(error) {
-
-    urlBox.select();
-    document.execCommand("copy");
-
-    setStatus(
-      "📋 Đã copy link",
-      "ok"
-    );
-
-  }
-
-}
-
-/* =========================================================
-   VIDEO EVENTS
-========================================================= */
-
-video.addEventListener(
-  "playing",
-  function() {
-
-    if(freem3uPlaying) {
-      if(vidFound && freem3uPlayingNumber !== null) {
-        vidFound.value = "KÊNH " + freem3uPlayingNumber;
-      }
-
-      if(qualityText && freem3uPlayingNumber !== null) {
-        qualityText.textContent =
-          "FreeM3U — Kênh số " + freem3uPlayingNumber;
-      }
-
-      setVidScanStatus(
-        "🟢 TÌM THẤY KÊNH " + freem3uPlayingNumber + " — đang phát.",
-        "ok"
-      );
-
-      setStatus(
-        "🟢 FREEM3U — Kênh số " + freem3uPlayingNumber + " đang phát",
-        "ok"
-      );
-
-      return;
-    }
-
-    showQuality(currentPlayingLink, true);
-
-    setStatus(
-      "🟢 Đang phát — Link " +
-      (currentPlayingLink + 1),
-      "ok"
-    );
-  }
-);
-
-video.addEventListener(
-  "waiting",
-  function() {
-
-    setStatus(
-      "⏳ Đang tải dữ liệu..."
-    );
-
-  }
-);
-
-video.addEventListener(
-  "error",
-  function() {
-
-    setStatus(
-      "🔴 Video không thể phát",
-      "error"
-    );
-
-  }
-);
-
-/* =========================================================
-   PHÍM TẮT
-========================================================= */
-
-document.addEventListener(
-  "keydown",
-  function(event) {
-
-    /*
-      Không kích hoạt phím tắt khi đang nhập
-    */
-
-    if(
-      event.target.tagName === "INPUT" ||
-      event.target.tagName === "TEXTAREA"
-    ) {
-      return;
-    }
-
-    if(event.key === "ArrowRight") {
-      nextLink();
-    }
-
-    else if(event.key === "ArrowLeft") {
-      prevLink();
-    }
-
-    else if(event.key === "ArrowDown") {
-      nextChannel();
-    }
-
-    else if(event.key === "ArrowUp") {
-      prevChannel();
-    }
-
-    else if(event.key === "Enter") {
-      playCurrent();
-    }
-
-  }
-);
-
-/* Khởi tạo FREEM3U scanner */
-updateVidScanDisplay(1);
-
-/* Khởi tạo URL */
-updateUrl();
-
-</script>
+        function getSeekableRange() {
+            try {
+                if (!video.seekable || video.seekable.length === 0) return null;
+                const start = video.seekable.start(0);
+                const end = video.seekable.end(video.seekable.length - 1);
+                if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
+                return { start, end };
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function updateTimeLabels() {
+            const range = getSeekableRange();
+            if (range) {
+                currentTimeEl.textContent = formatTime(Math.max(0, video.currentTime - range.start));
+                durationTimeEl.textContent = formatTime(range.end - range.start);
+            } else {
+                currentTimeEl.textContent = formatTime(video.currentTime);
+                durationTimeEl.textContent = "LIVE";
+            }
+        }
+
+        function setProgressVisual(percent) {
+            const value = Math.max(0, Math.min(100, Number(percent) || 0));
+            progress.value = value;
+            progress.style.background = `linear-gradient(to right, #ef4444 0%, #ef4444 ${value}%, #30382b ${value}%, #30382b 100%)`;
+        }
+
+        function updateProgressState() {
+            const range = getSeekableRange();
+            if (!range) {
+                progressSeekable = false;
+                progress.classList.add("live-only");
+                setProgressVisual(100);
+                updateTimeLabels();
+                return;
+            }
+            progressSeekable = true;
+            progress.classList.remove("live-only");
+            const windowDuration = range.end - range.start;
+            const position = Math.max(0, Math.min(windowDuration, video.currentTime - range.start));
+            const percent = windowDuration > 0 ? (position / windowDuration) * 100 : 100;
+            setProgressVisual(percent);
+            updateTimeLabels();
+        }
+
+        document.addEventListener("visibilitychange", () => {
+            if (!hls) return;
+
+            if (document.hidden) {
+                try { hls.stopLoad(); } catch (_) {}
+            } else if (!video.paused) {
+                try { hls.startLoad(); } catch (_) {}
+            }
+        });
+
+        window.addEventListener("DOMContentLoaded", () => {
+            setupEventListeners();
+            loadPlaylist();
+        });
+
+
+        function decodeXmlEntities(value = "") {
+            const textarea = document.createElement("textarea");
+            textarea.innerHTML = value;
+            return textarea.value;
+        }
+
+
+        // =========================================================
+        // PHÁT TRỰC TIẾP LINK M3U8
+        // - Không cần playlist M3U.
+        // - Link được đưa thẳng vào HLS.js / native HLS.
+        // - Không làm thay đổi playlist M3U hiện tại.
+        // =========================================================
+        async function playDirectM3U8(url) {
+            const requestId = ++playRequestId;
+            const directUrl = String(url || "").trim();
+
+            if (!directUrl) {
+                alert("⚠️ Vui lòng nhập link M3U8.");
+                return;
+            }
+
+            if (!/^https?:\/\//i.test(directUrl)) {
+                alert("⚠️ Link M3U8 phải bắt đầu bằng http:// hoặc https://");
+                return;
+            }
+
+            if (hls) {
+                try { hls.stopLoad(); } catch (_) {}
+                try { hls.destroy(); } catch (_) {}
+                hls = null;
+            }
+
+            try { video.pause(); } catch (_) {}
+            video.removeAttribute("src");
+            try { video.load(); } catch (_) {}
+
+            if (requestId !== playRequestId) return;
+
+            currentChannelIndex = -1;
+
+            document.querySelectorAll(".channel.active").forEach(el => {
+                el.classList.remove("active");
+            });
+
+            activeChannelLogo.removeAttribute("src");
+            activeChannelLogo.style.display = "none";
+
+            playerTitle.textContent = "M3U8 STREAMING...";
+            playerTitle.classList.remove("title-hidden");
+
+            playerOverlay.style.color = "#88937d";
+            playerOverlay.classList.remove("hidden");
+            playerOverlay.textContent = "ĐANG TẢI LINK M3U8.....";
+
+            progressSeekable = false;
+            progress.classList.add("live-only");
+            progress.value = 100;
+            setProgressVisual(100);
+            currentTimeEl.textContent = "00:00";
+            durationTimeEl.textContent = "LIVE";
+
+            showVideoControls();
+
+            return new Promise((resolve, reject) => {
+                let settled = false;
+
+                const resolveOnce = () => {
+                    if (settled || requestId !== playRequestId) return;
+                    settled = true;
+                    playerOverlay.classList.add("hidden");
+                    updatePlayButton();
+                    resolve();
+                };
+
+                const rejectOnce = (err) => {
+                    if (settled || requestId !== playRequestId) return;
+                    settled = true;
+                    console.error("Lỗi phát link M3U8:", err);
+                    playerOverlay.style.color = "#f87171";
+                    playerOverlay.classList.remove("hidden");
+                    playerOverlay.textContent =
+                        "LINK M3U8 KHÔNG PHÁT ĐƯỢC! VUI LÒNG KIỂM TRA LINK!";
+                    updatePlayButton();
+                    reject(err);
+                };
+
+                if (video.canPlayType("application/vnd.apple.mpegurl")) {
+                    video.src = directUrl;
+                    video.play()
+                        .then(resolveOnce)
+                        .catch(rejectOnce);
+                    return;
+                }
+
+                if (window.Hls && Hls.isSupported()) {
+                    hls = new Hls(LOW_END_HLS_CONFIG);
+
+                    if (requestId !== playRequestId) {
+                        try { hls.destroy(); } catch (_) {}
+                        hls = null;
+                        reject(new Error("Yêu cầu phát đã bị thay thế."));
+                        return;
+                    }
+
+                    hls.loadSource(directUrl);
+                    hls.attachMedia(video);
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        if (requestId !== playRequestId) return;
+
+                        video.play()
+                            .then(resolveOnce)
+                            .catch(rejectOnce);
+                    });
+
+                    hls.on(Hls.Events.ERROR, (event, data) => {
+                        if (requestId !== playRequestId) return;
+                        if (!data.fatal) return;
+
+                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                            setTimeout(() => {
+                                if (requestId !== playRequestId || !hls) return;
+                                try { hls.startLoad(); } catch (_) {}
+                            }, 800);
+                            return;
+                        }
+
+                        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                            try {
+                                hls.recoverMediaError();
+                            } catch (_) {
+                                rejectOnce(data);
+                            }
+                            return;
+                        }
+
+                        rejectOnce(data);
+                    });
+
+                    return;
+                }
+
+                video.src = directUrl;
+                video.play()
+                    .then(resolveOnce)
+                    .catch(rejectOnce);
+            });
+        }
+
+        async function loadPlaylist(sourceUrl = M3U_URL, signal = null) {
+            try {
+                const response = await fetch(sourceUrl, {
+                    cache: "no-store",
+                    signal
+                });
+
+                if (!response.ok) throw new Error("HTTP " + response.status);
+
+                const text = await response.text();
+                const parsedChannels = parseM3U(text);
+
+                if (parsedChannels.length === 0) {
+                    throw new Error("Playlist không có kênh");
+                }
+
+                // Chỉ đổi playlist sau khi tải và phân tích thành công.
+                channels = parsedChannels;
+                currentPlaylistUrl = sourceUrl;
+
+                updateChannelGroupFilter();
+                renderChannels();
+
+                let defaultIndex = channels.findIndex(
+                    ch => ch.name.toUpperCase().includes("VTV6")
+                );
+                if (defaultIndex === -1) defaultIndex = 0;
+
+                playChannelByIndex(defaultIndex, false, true);
+            } catch (error) {
+                if (error?.name === "AbortError") return;
+
+                console.error("PLAYLIST ERROR:", error);
+                alert(
+                    "❌ Không tải được link M3U này.\n\n" +
+                    "Hãy kiểm tra lại link, CORS hoặc playlist có đúng định dạng M3U/M3U8 hay không."
+                );
+                throw error;
+            }
+        }
+
+
+        function parseM3U(text) {
+            const lines = text.split(/\r?\n/);
+            const result = [];
+            let info = null;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                if (line.toUpperCase().startsWith("#EXTINF")) {
+                    const comma = line.indexOf(",");
+                    let name = comma >= 0 ? line.substring(comma + 1).trim() : "Kênh không tên";
+                    const tvgName = getAttribute(line, "tvg-name");
+                    if (tvgName) name = tvgName;
+
+                    info = {
+                        name,
+                        logo: getAttribute(line, "tvg-logo"),
+                        group: getAttribute(line, "group-title") || getAttribute(line, "tvg-group") || "Khác"
+                    };
+                    continue;
+                }
+
+                if (line.startsWith("#")) continue;
+
+                if (info) {
+                    result.push({ ...info, url: line });
+                    info = null;
+                }
+            }
+            return result;
+        }
+
+        function getAttribute(line, attribute) {
+            const escaped = attribute.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+            const regex = new RegExp(escaped + '\\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|([^\\s,]+))', "i");
+            const match = line.match(regex);
+            return match ? (match[1] || match[2] || match[3] || "").trim() : "";
+        }
+
+        function updateChannelGroupFilter() {
+            if (!channelGroupFilter) return;
+
+            const groups = [...new Set(
+                channels
+                    .map(channel => (channel.group || "Khác").trim())
+                    .filter(Boolean)
+            )].sort((a, b) => a.localeCompare(b, "vi"));
+
+            channelGroupFilter.innerHTML = "";
+
+            const allOption = document.createElement("option");
+            allOption.value = "__ALL__";
+            allOption.textContent = "Tất cả các kênh";
+            channelGroupFilter.appendChild(allOption);
+
+            groups.forEach(group => {
+                const option = document.createElement("option");
+                option.value = group;
+                option.textContent = group;
+                channelGroupFilter.appendChild(option);
+            });
+
+            if (groups.includes(selectedChannelGroup)) {
+                channelGroupFilter.value = selectedChannelGroup;
+            } else {
+                selectedChannelGroup = "__ALL__";
+                channelGroupFilter.value = "__ALL__";
+            }
+        }
+
+        function getFilteredChannels() {
+            if (selectedChannelGroup === "__ALL__") {
+                return channels;
+            }
+
+            return channels.filter(channel =>
+                (channel.group || "Khác").trim() === selectedChannelGroup
+            );
+        }
+
+        function renderChannels() {
+            channelList.innerHTML = "";
+            activeChannelCard = null;
+
+            const filteredChannels = getFilteredChannels();
+            channelCount.textContent = filteredChannels.length + " KÊNH";
+
+            if (filteredChannels.length === 0) {
+                channelList.innerHTML = '<div class="empty">Không có kênh trong nhóm này.</div>';
+                return;
+            }
+
+            filteredChannels.forEach(channel => {
+                const index = channels.indexOf(channel);
+
+                const item = document.createElement("div");
+                item.dataset.channelIndex = String(index);
+                item.className = "channel" + (index === currentChannelIndex ? " active" : "");
+
+                if (index === currentChannelIndex) {
+                    activeChannelCard = item;
+                }
+
+                const logoContainer = document.createElement("div");
+                logoContainer.className = "channel-logo";
+
+                const fallback = document.createElement("div");
+                fallback.className = "logo-fallback";
+                fallback.textContent = "📺";
+
+                if (channel.logo) {
+                    const img = document.createElement("img");
+                    img.src = channel.logo;
+                    img.alt = channel.name;
+                    img.loading = "lazy";
+                    img.decoding = "async";
+                    img.onerror = function () {
+                        this.style.display = "none";
+                        fallback.style.display = "flex";
+                    };
+                    logoContainer.appendChild(img);
+                    fallback.style.display = "none";
+                }
+
+                logoContainer.appendChild(fallback);
+
+                const info = document.createElement("div");
+                info.className = "channel-info";
+
+                const name = document.createElement("div");
+                name.className = "channel-name";
+                name.textContent = channel.name;
+
+                info.appendChild(name);
+                item.appendChild(logoContainer);
+                item.appendChild(info);
+
+                item.addEventListener("click", () => {
+                    playChannelByIndex(index, true, false);
+                });
+
+                channelList.appendChild(item);
+            });
+        }
+
+        function playChannelByIndex(index, scrollToTop = true, isInitialAutoplay = false) {
+            const requestId = ++playRequestId;
+
+            // Dọn stream cũ trước khi tạo stream mới.
+            // Giúp máy yếu không phải xử lý song song nhiều stream.
+            if (hls) {
+                try { hls.stopLoad(); } catch (_) {}
+                try { hls.destroy(); } catch (_) {}
+                hls = null;
+            }
+
+            try { video.pause(); } catch (_) {}
+            video.removeAttribute("src");
+            try { video.load(); } catch (_) {}
+
+            if (requestId !== playRequestId) return;
+
+
+            if (index < 0 || index >= channels.length) return;
+
+            currentChannelIndex = index;
+            const channel = channels[index];
+
+
+            if (channel.logo) {
+                activeChannelLogo.src = channel.logo;
+                activeChannelLogo.style.display = "inline-block";
+                activeChannelLogo.onerror = () => { activeChannelLogo.style.display = "none"; };
+            } else {
+                activeChannelLogo.style.display = "none";
+            }
+
+            // Chỉ đổi trạng thái active, không render lại toàn bộ danh sách.
+            // Dùng reference đã lưu thay vì querySelectorAll() + querySelector() mỗi lần đổi kênh.
+            if (activeChannelCard) {
+                activeChannelCard.classList.remove("active");
+            }
+
+            activeChannelCard = channelList.querySelector(
+                `.channel[data-channel-index="${index}"]`
+            );
+
+            if (activeChannelCard) {
+                activeChannelCard.classList.add("active");
+            }
+
+            if (scrollToTop) window.scrollTo({ top: 0, behavior: "smooth" });
+
+            video.pause();
+            progressSeekable = false;
+            progress.classList.add("live-only");
+            progress.value = 100;
+            setProgressVisual(100);
+            currentTimeEl.textContent = "00:00";
+            durationTimeEl.textContent = "LIVE";
+
+            if (isInitialAutoplay) {
+                video.muted = true;
+                unmuteBanner.classList.remove("hidden");
+            } else if (!video.muted) {
+                unmuteBanner.classList.add("hidden");
+            }
+
+            playerTitle.textContent = channel.name;
+            playerTitle.classList.remove("title-hidden");
+
+            playerOverlay.style.color = "#88937d";
+            playerOverlay.classList.remove("hidden");
+            playerOverlay.textContent = `ĐANG TẢI KÊNH ${channel.name}.....`;
+
+            showVideoControls();
+
+            const url = channel.url;
+
+            if (video.canPlayType("application/vnd.apple.mpegurl")) {
+                video.src = url;
+                video.play().then(handlePlaySuccess).catch(handlePlayError);
+            } else if (window.Hls && Hls.isSupported()) {
+                hls = new Hls(LOW_END_HLS_CONFIG);
+
+                if (requestId !== playRequestId) return;
+
+                hls.loadSource(url);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (requestId !== playRequestId) return;
+                    video.play().then(handlePlaySuccess).catch(handlePlayError);
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (requestId !== playRequestId) return;
+                    if (!data.fatal) return;
+
+                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                        setTimeout(() => {
+                            if (requestId !== playRequestId || !hls) return;
+                            try {
+                                hls.startLoad();
+                            } catch (_) {}
+                        }, 800);
+                        return;
+                    }
+
+                    if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                        try {
+                            hls.recoverMediaError();
+                        } catch (_) {
+                            handlePlayError(data);
+                        }
+                        return;
+                    }
+
+                    handlePlayError(data);
+                });
+            } else {
+                video.src = url;
+                video.play().then(handlePlaySuccess).catch(handlePlayError);
+            }
+        }
+
+        function handlePlaySuccess() {
+            playerOverlay.classList.add("hidden");
+            updatePlayButton();
+        }
+
+        function handlePlayError(err) {
+            console.error("Lỗi phát luồng video:", err);
+            playerOverlay.style.color = "#f87171";
+            playerOverlay.classList.remove("hidden");
+            playerOverlay.textContent = "KÊNH NÀY KHÔNG PHÁT ĐƯỢC! VUI LÒNG CHỌN KÊNH KHÁC!";
+            updatePlayButton();
+        }
+
+        function updatePlayButton() {
+            playBtn.textContent = video.paused ? "▶" : "⏸";
+        }
+
+
+        function toggleFullscreen() {
+            const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+
+            if (!isFullscreen) {
+                const elem = player;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(() => {
+                        if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+                    });
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                } else if (video.webkitEnterFullscreen) {
+                    video.webkitEnterFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        let controlsHideTimer = null;
+        const videoControls = document.querySelector(".video-controls");
+
+        function showVideoControls() {
+            if (!videoControls) return;
+            clearTimeout(controlsHideTimer);
+            player.classList.add("controls-active");
+            videoControls.classList.remove("controls-hidden");
+            if (playerTitle) playerTitle.classList.remove("title-hidden");
+        }
+
+        function hideVideoControls(delay = 1000) {
+            if (!videoControls) return;
+            clearTimeout(controlsHideTimer);
+            controlsHideTimer = setTimeout(() => {
+                if (!video.paused && !videoControls.matches(":hover")) {
+                    videoControls.classList.add("controls-hidden");
+                    player.classList.remove("controls-active");
+                    if (playerTitle) playerTitle.classList.add("title-hidden");
+                }
+            }, delay);
+        }
+
+
+        function setupEventListeners() {
+
+            channelGroupFilter.addEventListener("change", () => {
+                selectedChannelGroup = channelGroupFilter.value || "__ALL__";
+                renderChannels();
+                scrollToActiveChannelInList();
+            });
+
+            if (videoControls) {
+                player.addEventListener("mouseenter", showVideoControls);
+                player.addEventListener("mousemove", showVideoControls);
+                player.addEventListener("mouseleave", () => {
+                    if (!document.fullscreenElement && !document.webkitFullscreenElement && !video.paused) {
+                        hideVideoControls(1000);
+                    }
+                });
+
+                videoControls.addEventListener("mouseenter", showVideoControls);
+                videoControls.addEventListener("mousemove", showVideoControls);
+                videoControls.addEventListener("mouseleave", () => {
+                    if (!video.paused) hideVideoControls(700);
+                });
+
+                document.addEventListener("mousemove", (e) => {
+                    const isFullscreen = !!(
+                        document.fullscreenElement ||
+                        document.webkitFullscreenElement ||
+                        document.mozFullScreenElement ||
+                        document.msFullscreenElement
+                    );
+
+                    if (!isFullscreen) return;
+
+                    const rect = player.getBoundingClientRect();
+                    const insidePlayer =
+                        e.clientX >= rect.left &&
+                        e.clientX <= rect.right &&
+                        e.clientY >= rect.top &&
+                        e.clientY <= rect.bottom;
+
+                    if (insidePlayer) {
+                        showVideoControls();
+                        if (!video.paused) hideVideoControls(1500);
+                    }
+                });
+
+                document.addEventListener("fullscreenchange", showVideoControls);
+                document.addEventListener("webkitfullscreenchange", showVideoControls);
+            }
+
+            video.addEventListener("play", () => hideVideoControls(1800));
+            video.addEventListener("pause", showVideoControls);
+            video.addEventListener("ended", showVideoControls);
+
+            // Giới hạn tần suất cập nhật progress/time label để giảm CPU trên máy yếu.
+            // Các event video có thể bắn rất dày, đặc biệt là timeupdate/progress.
+            let progressUpdateTimer = null;
+            const scheduleProgressUpdate = () => {
+                if (progressUpdateTimer !== null) return;
+
+                progressUpdateTimer = setTimeout(() => {
+                    progressUpdateTimer = null;
+                    updateProgressState();
+                }, 250);
+            };
+
+            video.addEventListener("timeupdate", scheduleProgressUpdate);
+            video.addEventListener("durationchange", scheduleProgressUpdate);
+            video.addEventListener("loadedmetadata", scheduleProgressUpdate);
+            video.addEventListener("loadeddata", scheduleProgressUpdate);
+            video.addEventListener("canplay", scheduleProgressUpdate);
+            video.addEventListener("progress", scheduleProgressUpdate);
+
+            progress.addEventListener("input", () => {
+                const range = getSeekableRange();
+                if (!progressSeekable || !range) return;
+
+                const percent = Math.max(0, Math.min(100, Number(progress.value))) / 100;
+                setProgressVisual(percent * 100);
+
+                const previewTime = percent * (range.end - range.start);
+                currentTimeEl.textContent = formatTime(previewTime);
+            });
+
+            let seekInProgress = false;
+            let seekUnlockTimer = null;
+
+            function performStableSeek() {
+                if (seekInProgress) return;
+
+                const range = getSeekableRange();
+                if (!progressSeekable || !range) return;
+
+                const percent = Math.max(0, Math.min(100, Number(progress.value))) / 100;
+                const target = range.start + percent * (range.end - range.start);
+                if (!Number.isFinite(target)) return;
+
+                seekInProgress = true;
+                video.currentTime = target;
+                currentTimeEl.textContent = formatTime(target - range.start);
+
+                clearTimeout(seekUnlockTimer);
+                seekUnlockTimer = setTimeout(() => {
+                    seekInProgress = false;
+                }, 1800);
+            }
+
+            video.addEventListener("seeked", () => {
+                seekInProgress = false;
+                clearTimeout(seekUnlockTimer);
+                updateProgressState();
+            });
+
+            progress.addEventListener("change", performStableSeek);
+
+            unmuteBanner.addEventListener("click", () => {
+                video.muted = false;
+                unmuteBanner.classList.add("hidden");
+            });
+
+            video.addEventListener("volumechange", () => {
+                if (!video.muted) unmuteBanner.classList.add("hidden");
+            });
+
+            playBtn.addEventListener("click", () => {
+                if (video.paused) {
+                    video.play().catch(() => {});
+                } else {
+                    video.pause();
+                }
+            });
+
+            video.addEventListener("play", updatePlayButton);
+            video.addEventListener("pause", updatePlayButton);
+
+            previousBtn.addEventListener("click", () => {
+                const filteredChannels = getFilteredChannels();
+                if (filteredChannels.length === 0) return;
+
+                const currentPosition = filteredChannels.findIndex(
+                    channel => channel === channels[currentChannelIndex]
+                );
+
+                const prevPosition =
+                    (currentPosition - 1 + filteredChannels.length) %
+                    filteredChannels.length;
+
+                const prevIndex = channels.indexOf(filteredChannels[prevPosition]);
+
+                if (prevIndex !== -1) {
+                    playChannelByIndex(prevIndex, true, false);
+                }
+            });
+
+            nextBtn.addEventListener("click", () => {
+                const filteredChannels = getFilteredChannels();
+                if (filteredChannels.length === 0) return;
+
+                const currentPosition = filteredChannels.findIndex(
+                    channel => channel === channels[currentChannelIndex]
+                );
+
+                const nextPosition =
+                    (currentPosition + 1) % filteredChannels.length;
+
+                const nextIndex = channels.indexOf(filteredChannels[nextPosition]);
+
+                if (nextIndex !== -1) {
+                    playChannelByIndex(nextIndex, true, false);
+                }
+            });
+
+            currentChannelBtn.addEventListener("click", () => {
+                scrollToActiveChannelInList();
+            });
+
+            fullscreenBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleFullscreen();
+            });
+
+            // Nút XEM LỊCH: mở website lịch ở tab mới
+            calendarBtn.addEventListener("click", () => {
+                window.open(CALENDAR_URL, "_blank", "noopener,noreferrer");
+            });
+
+            // Nút CINEMAX: mở trang xem phim ở tab mới
+            cinemaxBtn.addEventListener("click", () => {
+                window.open(CINEMAX_URL, "_blank", "noopener,noreferrer");
+            });
+
+            // Nút TẢI APP: mở đúng trang download ở tab mới
+            downloadAppBtn.addEventListener("click", () => {
+                window.open(DOWNLOAD_APP_URL, "_blank", "noopener,noreferrer");
+            });
+
+            // =========================================================
+            // NÚT SỐ KÊNH → 2 Ô NHẬP RIÊNG:
+            // 1. Link M3U
+            // 2. Link M3U8 trực tiếp
+            // =========================================================
+            channelCount.addEventListener("click", async () => {
+                const modal = document.createElement("div");
+                modal.className = "playlist-choice-modal";
+
+                modal.innerHTML = `
+                    <div class="playlist-choice-box">
+                        <div class="playlist-choice-title">📺 NHẬP LINK .M3U HOẶC .M3U8</div>
+
+                        <div class="playlist-choice-item">
+                            <div class="playlist-choice-label">📋 LINK LIST .M3U</div>
+                            <input
+                                id="m3uInput"
+                                class="playlist-choice-input"
+                                type="url"
+                                placeholder="https://example.com/playlist.m3u"
+                                value="${currentPlaylistUrl !== M3U_URL ? currentPlaylistUrl : ""}"
+                            >
+                            <button id="m3uOkBtn" class="playlist-choice-ok" type="button">OK</button>
+                        </div>
+
+                        <div class="playlist-choice-item">
+                            <div class="playlist-choice-label">▶️ LINK .M3U8 STREAMING</div>
+                            <input
+                                id="m3u8Input"
+                                class="playlist-choice-input"
+                                type="url"
+                                placeholder="https://example.com/live/stream.m3u8"
+                            >
+                            <button id="m3u8OkBtn" class="playlist-choice-ok" type="button">OK</button>
+                        </div>
+
+                        <button id="playlistCancelBtn" class="playlist-choice-cancel" type="button">
+                            HỦY
+                        </button>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                const m3uInput = modal.querySelector("#m3uInput");
+                const m3u8Input = modal.querySelector("#m3u8Input");
+                const m3uOkBtn = modal.querySelector("#m3uOkBtn");
+                const m3u8OkBtn = modal.querySelector("#m3u8OkBtn");
+                const cancelBtn = modal.querySelector("#playlistCancelBtn");
+
+                const closeModal = () => {
+                    modal.remove();
+                };
+
+                cancelBtn.addEventListener("click", closeModal);
+
+                modal.addEventListener("click", (e) => {
+                    if (e.target === modal) closeModal();
+                });
+
+                // ---------------------------------------------------------
+                // NÚT OK M3U
+                // ---------------------------------------------------------
+                m3uOkBtn.addEventListener("click", async () => {
+                    const tempUrl = m3uInput.value.trim();
+
+                    if (!tempUrl) {
+                        alert("⚠️ Vui lòng nhập link M3U.");
+                        m3uInput.focus();
+                        return;
+                    }
+
+                    if (!/^https?:\/\//i.test(tempUrl)) {
+                        alert("⚠️ Link M3U phải bắt đầu bằng http:// hoặc https://");
+                        m3uInput.focus();
+                        return;
+                    }
+
+                    m3uOkBtn.disabled = true;
+                    m3uOkBtn.textContent = "ĐANG TẢI...";
+
+                    try {
+                        await loadPlaylist(tempUrl);
+                        closeModal();
+                    } catch (_) {
+                        // loadPlaylist đã hiển thị thông báo lỗi.
+                    } finally {
+                        m3uOkBtn.disabled = false;
+                        m3uOkBtn.textContent = "OK";
+                    }
+                });
+
+                // ---------------------------------------------------------
+                // NÚT OK M3U8
+                // ---------------------------------------------------------
+                m3u8OkBtn.addEventListener("click", async () => {
+                    const directUrl = m3u8Input.value.trim();
+
+                    if (!directUrl) {
+                        alert("⚠️ Vui lòng nhập link M3U8.");
+                        m3u8Input.focus();
+                        return;
+                    }
+
+                    if (!/^https?:\/\//i.test(directUrl)) {
+                        alert("⚠️ Link M3U8 phải bắt đầu bằng http:// hoặc https://");
+                        m3u8Input.focus();
+                        return;
+                    }
+
+                    m3u8OkBtn.disabled = true;
+                    m3u8OkBtn.textContent = "ĐANG PHÁT...";
+
+                    try {
+                        await playDirectM3U8(directUrl);
+                        closeModal();
+                    } finally {
+                        m3u8OkBtn.disabled = false;
+                        m3u8OkBtn.textContent = "OK";
+                    }
+                });
+
+                // Enter trong từng ô = bấm OK tương ứng.
+                m3uInput.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") m3uOkBtn.click();
+                });
+
+                m3u8Input.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") m3u8OkBtn.click();
+                });
+
+                setTimeout(() => m3uInput.focus(), 0);
+            });
+
+            // =========================================================
+            // KEYBOARD SHORTCUTS
+            // ←  : Kênh trước
+            // →  : Kênh sau
+            // F  : Toàn màn hình
+            // X  : Trỏ về kênh đang phát
+            // H  : Trở về màn hình đang phát
+            // Không xử lý shortcut khi đang nhập vào ô INPUT/TEXTAREA.
+            // =========================================================
+            document.addEventListener("keydown", (e) => {
+                if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
+                switch (e.key) {
+                    case "ArrowLeft":
+                        e.preventDefault();
+                        previousBtn.click();
+                        break;
+
+                    case "ArrowRight":
+                        e.preventDefault();
+                        nextBtn.click();
+                        break;
+
+                    case "f":
+                    case "F":
+                        e.preventDefault();
+                        toggleFullscreen();
+                        break;
+
+                    case "x":
+                    case "X":
+                        e.preventDefault();
+                        scrollToActiveChannelInList();
+                        break;
+
+                    case "h":
+                    case "H":
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        break;
+                }
+            });
+        }
+
+        function getActiveChannelElement() {
+            return Array.from(document.querySelectorAll(".channel")).find(el => el.classList.contains("active")) || null;
+        }
+
+        function scrollToActiveChannelInList() {
+            const activeChannel = getActiveChannelElement();
+            if (!activeChannel) return;
+            activeChannel.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+                inline: "center"
+            });
+        }
+
+
+    </script>
 </body>
+
 </html>
